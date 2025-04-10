@@ -1,3 +1,9 @@
+---
+id: system_design
+title: Проектирование системы FinSight
+sidebar_label: System Design RFC
+---
+
 # RFC: Проектирование системы FinSight
 
 ## 1. Контекст
@@ -97,11 +103,68 @@
 
 ### 7.1 C1 — Контекстная диаграмма
 
-_Будет добавлена через PlantUML и LikeC4_
+На диаграмме контекста отображены взаимодействия между пользователем, системой FinSight и внешним API Tinkoff Invest.
+
+![Контекстная диаграмма C1](https://www.plantuml.com/plantuml/png/LPB1RjD048RlUOebfo2riP0uSIgAG8e4KjJIS-GccsI5iucyQoYtfAOK10A92zmGRs0LhBX9xRx2p1lnZuX9E4JU-MVc-sT6EN8-Z7qoZLJdGV-fiITcFF7zpinwVUuRzumTHCbGgudtS_Se2EBmTNji_2GvIvoE1r9cVNimcmRpABJ2ENH-69cpeFFmi2VIwVDdmJHqNiUGQd1xZif6ewTZDxCjGHse9lsWYZRyYLRuNbF65vHBt9JSTogXvRo4Ml7YG571IxghEpZbp_o12hfHa96IPhhbLDKxDUytJjvWZ6bhPAmJ1TX_IR7ukUkZJ5569NuRC5S8-IqUfOYybF7Wh-YE5tZ_WbwXg424ZDJW_KK8QtudCy5xQzv_SkvRtjYNiz6e7yuDV5_yZLJNljBEgyUzhao3ZwBVj05dksNALvJNw69t3WXYKa4f-IDVIbjM1-9yhAFjYVSsfw-o5lfkgK93JZV2ecjEGRrGuiKBo2jrseMTZ0MMe7QG__UWR-39HJ9-JuNSGKXxqr2kg5AmkP848ZdXcYgywzEjqNmfwu-FUnsP_KZR8VugVm00)
+
+<details>
+<summary>PlantUML код для генерации Контекстной диаграммы</summary>
+
+```plantuml
+@startuml C1_FinSight_Context
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(user, "Пользователь", "Инвестор, использующий систему FinSight")
+System(finsight, "FinSight", "Система анализа финансов и прогнозирования акций")
+
+System_Ext(tinkoff_api, "Tinkoff Invest API", "API для получения инвестиционных данных")
+
+Rel(user, finsight, "Взаимодействует через UI и API")
+Rel(finsight, tinkoff_api, "Запрашивает данные о счете и котировках", "gRPC")
+
+@enduml
+```
+</details>
+
+---
 
 ### 7.2 C2 — Диаграмма контейнеров
 
-_Будет добавлена через PlantUML и LikeC4_
+На диаграмме контейнеров показано логическое разделение компонентов внутри системы FinSight: веб-приложение, ML-сервис, база данных, кэш, мониторинг и внешние зависимости.
+
+![Диаграмма контейнеров C2](https://www.plantuml.com/plantuml/png/VPFVJzDG5CVVzrTSzpIIGLzyyWbSK8b0wZQUbx9UjiRsjcblKM9COCGV2QWnCT4OeZ76-3fmau9I_uLp_oFFDojZ4v2mz9pktFFzd7E_cq-q4-iqy4itFDNsKrUAhjPHSikoOkVHNCVJtNGzJMJS3fMMIi-rmy2AV4VXp6oYNTzRjsetPssyMbjPjW8dqJBcLwqQdt0y9UEv2FrBjeoJK5NGh2hAz9bo-cNswPYVHzGtFHeYBy-KIeqjxX6qReUfSfrugxBXgSJhT3KVk-Ef1iBoZ7XI4lmtLgauaOS2rb-mbyH25FbUsz5UgChysjxItL1LnKBZxf9Os_JQOSnPKOm2-aI7PflwT0WMimSc6fgUg2yschDqpDaV_ZutEsQlAkYKgNFE1vJH6MLcs-mIgeiMERVOvL6c2GE_nSEpk6J1bMNH62KNV8Ze2msvon4ttH7GvBqCp0uhza41DJeH_EWBq720_Gt5_TLLGRyv6M2Hb5rITzUX4oQw4yl6W-L2wokzfNU8wHlOqTxqMFUgs-7FILMONb48cbFpd7aoWNy6vZhU2aUlhqM_n1LBrqiOe8udI6fEkoiHq4VpohoSs2xsYc5nGGA9Q7hgORYn8N3bO1WGPCxu_eR_tqOKXu7KNPb2sXudaAK3oi5wFWp7FufjvNG8dC8QB00Kb9n271Ddh9RJJrP5XpUi-tHiwCN7kg97mAsHMy_nbzIcJBGuz-87FemniSyC6wPyFDNKYEO5Ls7Dnw9JjskiLgfBl_YDZIIky2-NeGhVYscUubUvYxuO07hPTJ3csHW62SW1CTbzol7q_WAYCF3L7XcYrRrcqxR-xUV2m_ITIGeyQpGPmNlxbt1WyudJXTCcV0LtZqKdAgVSGGUJrynbyrAvQU3_1G00)
+
+<details>
+<summary>PlantUML код для генерации диаграммы Контейнеров</summary>
+
+```plantuml
+@startuml C2_FinSight_Containers
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь")
+
+System_Boundary(finsight, "FinSight") {
+    Container(api, "FastAPI Application", "Python + FastAPI", "Обрабатывает REST-запросы, координирует работу")
+    Container(ml_service, "ML Service", "Python", "Сервис предсказаний на основе KNN модели")
+    Container(db, "PostgreSQL", "СУБД", "Хранит пользователей, транзакции и историю предсказаний")
+    Container(redis, "Redis", "Кэш", "Кэширует ответы от Tinkoff API и данные модели")
+    Container(prometheus, "Prometheus", "Мониторинг", "Собирает метрики приложения")
+}
+
+System_Ext(tinkoff_api, "Tinkoff Invest API", "Инвестиционные данные через gRPC")
+
+Rel(user, api, "REST-запросы")
+Rel(api, tinkoff_api, "Получение инвестиционных данных", "gRPC")
+Rel(api, ml_service, "Запрос на предсказание", "HTTP/gRPC")
+Rel(api, db, "Чтение/запись данных", "SQL")
+Rel(api, redis, "Кэширование")
+Rel(api, prometheus, "Метрики")
+
+@enduml
+```
+</details>
 
 ### 7.3 API стиль: REST
 
@@ -111,8 +174,111 @@ _Будет добавлена через PlantUML и LikeC4_
 
 ### 7.5 Модель БД (ERD)
 
-_Проектирование с помощью dbdiagram.io или dbml_  
-Сущности: `User`, `Transaction`, `Prediction`, `StockHistory`
+Ниже представлена сущностно-атрибутная модель данных FinSight. Основными сущностями являются пользователи, транзакции, исторические котировки и предсказания.
+
+![ERD — модель данных FinSight](https://www.plantuml.com/plantuml/svg/lLDXQzD06FxUN_4wFpI1JhUXNqefovgh2-iwxHBnMpYJwthiSbSk5xko2LDGFoW8wWyHL1YuwLz8_i9-YPVeqcG5XryiXGlFyzpBypntjnahB5KIiSQja8mf9w3mKqQC8nC2XkCOZg3J0SDjtUxtBVqpeTijfLD98opd_Y6PvniwIVUeSpTPy6CX2JtW9KzpddOR3KKL8u16DboUVeBqFFsHVas_fT-pTw0_FgSNwKNsDdi5sGl8NgPdwK-DdQTdeFzQ-YKxBJHdsHkzAL_VvwmUMrXFOY9Z4uuRK3D8GxCDdkVO6YSHfgmDBdhYWk4DdKSUWk6U2qDlC30rFquOypcEo6-DHW99i2AXZvM6d5sqxrgx3y6mKT_o1YvmCJDCi_7yoeEIcCSuK5Jm6wnKEygT-oK9Hdy7Bbz_W2BG7HgsO6y8DXeW5q7FskzPDihDuaWaNBMr-LqqSdh6-aPhmmIZcYVGtW-4d5z5hd69b8G7cdjiZNhRriXONpCNoPeZRwkPwnIDIAnmDAqLK9r4OyehKpOgVSHA18V-XEfLplzQoDAKQr527QKDjkMY1Tw2FsSuesfI3CYLOafuhPLxHLmcOh8CJ-Z1P1bbOhOCFXCioM_6blF06RgBZ5D9Glf_Zlo6ZXPE_EMwQX8I-Y6LfD1Ukm2zRTJRQKCpcJPRq0p5ZESh9ucIc3MBAWKVqv3meDBdVTrHkNVjylJZklalhwV83ISdgwlY6AgF2DgmibAZovGbkqbuc4Ji5m00)
+
+<details>
+<summary>PlantUML код для генерации ERD</summary>
+
+```plantuml
+@startuml ERD_FinSight_Detailed
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <u>x</u>
+!define foreign_key(x) <i>x</i>
+
+title ERD — модель данных с типами и ограничениями
+
+table(users) {
+  primary_key(id): UUID
+  email: TEXT (UNIQUE NOT NULL)
+  full_name: TEXT
+  created_at: TIMESTAMP (DEFAULT now())
+}
+
+table(transactions) {
+  primary_key(id): UUID
+  foreign_key(user_id): UUID (FK → users.id, ON DELETE CASCADE)
+  amount: NUMERIC(12,2) (NOT NULL)
+  category: TEXT (NOT NULL)
+  currency: VARCHAR(10) (DEFAULT 'RUB')
+  timestamp: TIMESTAMP (NOT NULL)
+  isin: VARCHAR(12)
+}
+
+table(stock_history) {
+  primary_key(id): UUID
+  isin: VARCHAR(12) (NOT NULL)
+  date: DATE (NOT NULL, UNIQUE with isin)
+  open: NUMERIC(12,4)
+  close: NUMERIC(12,4)
+  high: NUMERIC(12,4)
+  low: NUMERIC(12,4)
+  volume: BIGINT
+}
+
+table(predictions) {
+  primary_key(id): UUID
+  foreign_key(user_id): UUID (FK → users.id, ON DELETE CASCADE)
+  isin: VARCHAR(12) (NOT NULL)
+  prediction_date: DATE (NOT NULL)
+  predicted_direction: VARCHAR(10) (CHECK: 'up', 'down', 'neutral')
+  confidence: NUMERIC(5,4) (CHECK: 0–1)
+  created_at: TIMESTAMP (DEFAULT now())
+}
+
+users ||--o{ transactions : ""
+users ||--o{ predictions : ""
+@enduml
+```
+</details>
+
+Структура таблиц описана далее в SQL-формате:
+
+<details>
+<summary>Схема таблиц PostgreSQL</summary>
+
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    full_name TEXT,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE transactions (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    amount NUMERIC(12, 2) NOT NULL,
+    category TEXT NOT NULL,
+    currency VARCHAR(10) DEFAULT 'RUB',
+    timestamp TIMESTAMP NOT NULL,
+    isin VARCHAR(12)
+);
+
+CREATE TABLE stock_history (
+    id UUID PRIMARY KEY,
+    isin VARCHAR(12) NOT NULL,
+    date DATE NOT NULL,
+    open NUMERIC(12, 4),
+    close NUMERIC(12, 4),
+    high NUMERIC(12, 4),
+    low NUMERIC(12, 4),
+    volume BIGINT,
+    UNIQUE (isin, date)
+);
+
+CREATE TABLE predictions (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    isin VARCHAR(12) NOT NULL,
+    prediction_date DATE NOT NULL,
+    predicted_direction VARCHAR(10) CHECK (predicted_direction IN ('up', 'down', 'neutral')),
+    confidence NUMERIC(5, 4) CHECK (confidence >= 0 AND confidence <= 1),
+    created_at TIMESTAMP DEFAULT now()
+);
+```
+</details>
 
 ---
 
