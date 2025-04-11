@@ -1,0 +1,29 @@
+[run]
+branch = True
+source = src/app
+omit =
+    */__init__.py          # Ignore package init files
+    tests/*                # Skip tests from coverage
+    */test_*.py            # Skip test files
+    **/migrations/*        # Skip migration files
+    .venv/*                # Skip virtualenv
+    .tox/*                 # Skip tox envs
+    setup.py               # Skip setup script
+
+[report]
+show_missing = True
+skip_covered = True
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:              # Type check blocks
+    if __name__ == .__main__.:     # Main guard
+    raise NotImplementedError
+    assert False
+
+[html]
+directory = htmlcov
+
+[paths]
+source =
+    src
+    .venv/lib/*       # For matching paths across environments

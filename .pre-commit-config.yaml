@@ -1,0 +1,58 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-docstring-first
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: check-toml
+    -   id: check-yaml
+    -   id: debug-statements
+    -   id: detect-private-key
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+
+-   repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+    -   id: codespell
+        name: Spell Checker
+        stages: [pre-commit]
+
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+    -   id: python-check-blanket-noqa
+    -   id: python-check-blanket-type-ignore
+    -   id: python-no-eval
+    -   id: python-no-log-warn
+    -   id: python-use-type-annotations
+    -   id: rst-backticks
+    -   id: rst-directive-colons
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.9.6
+  hooks:
+    - id: ruff
+    - id: ruff-format
+
+- repo: local
+  hooks:
+    - id: type-check
+      name: Static type check
+      entry: make type-check
+      language: system
+      verbose: true
+      pass_filenames: false
+      stages: [pre-commit]
+      env:
+        - MYPY_USE_CACHE_DIR=0
+
+    - id: run-critical-tests
+      name: Run critical tests
+      entry: pytest -m critical
+      language: system
+      verbose: true
+      pass_filenames: false
+      stages: [pre-push]
