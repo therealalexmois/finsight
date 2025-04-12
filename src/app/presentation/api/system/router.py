@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 system_router: APIRouter = APIRouter(prefix='/system', tags=['system'])
 
 
-@system_router.get('/startup', status_code=HTTPStatus.OK, summary='Health Check')
+@system_router.get('/startup', status_code=HTTPStatus.OK, summary='Проверка запуска приложения')
 async def startup() -> JSONResponse:
     """Возвращает статус запуска приложения.
 
@@ -24,7 +24,7 @@ async def startup() -> JSONResponse:
     return JSONResponse(content={'status': 'ok'})
 
 
-@system_router.get('/readiness', status_code=HTTPStatus.OK, summary='Health Check')
+@system_router.get('/readiness', status_code=HTTPStatus.OK, summary='Проверка готовности')
 async def readiness() -> JSONResponse:
     """Проверяет, готово ли приложение обрабатывать запросы.
 
@@ -34,7 +34,7 @@ async def readiness() -> JSONResponse:
     return JSONResponse(content={'status': 'ok'})
 
 
-@system_router.get('/liveness', status_code=HTTPStatus.OK, summary='Health Check')
+@system_router.get('/liveness', status_code=HTTPStatus.OK, summary='Проверка активности')
 async def liveness() -> JSONResponse:
     """Проверяет, активно ли приложение.
 
