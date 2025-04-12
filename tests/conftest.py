@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.app.infrastructure.config import get_settings
+from src.app.infrastructure.container import AppContainer
 from src.app.presentation.webserver.app_factory import AppFactory
 
 if TYPE_CHECKING:
@@ -17,9 +17,9 @@ if TYPE_CHECKING:
 @pytest.fixture
 def fastapi_app() -> 'FastAPI':
     """Предоставляет экземпляр приложения FastAPI для тестирования."""
-    settings = get_settings()
+    config = AppContainer.config()
 
-    app_factory = AppFactory(settings)
+    app_factory = AppFactory(config)
 
     return app_factory.create_app()
 

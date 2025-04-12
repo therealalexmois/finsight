@@ -1,26 +1,14 @@
 """Контейнер зависимостей для управления синглтонами приложения."""
 
-from typing import TYPE_CHECKING
+from dependency_injector import containers, providers
 
 from src.app.domain.constants import LOGGER_NAME
 from src.app.infrastructure.adapters.logger.structlog_logger import StructlogLogger
-from src.app.infrastructure.config import get_settings
-
-if TYPE_CHECKING:
-    from src.app.application.ports.logger import Logger
 
 
-settings = get_settings()
+class AppContainer(containers.DeclarativeContainer):
+    """Контейнер централизованного хранения и предоставления зависимостей приложения."""
 
-
-class AppContainer:
-    """Контейнер централизованного хранения и предоставления зависимостей."""
-
-    @classmethod
-    def logger(cls) -> 'Logger':
-        """Возвращает синглтон логгера приложения.
-
-        Returns:
-            Экземпляр Logger.
-        """
-        return StructlogLogger(name=LOGGER_NAME)
+    config = providers.Configuration()
+    # settings: providers.Provider[Settings] = providers.Singleton(Settings)
+    logger: providers.Provider[StructlogLogger] = providers.Singleton(StructlogLogger, name=LOGGER_NAME)

@@ -16,9 +16,9 @@ from src.app.infrastructure.config import (
     _extract_project_field as extract_project_field,
 )
 from src.app.infrastructure.config import (
-    get_settings,
     Settings,
 )
+from src.app.infrastructure.container import AppContainer
 
 
 @pytest.mark.unit
@@ -97,10 +97,11 @@ class TestConfig:
     @staticmethod
     def test_get_settings_is_cached(monkeypatch: 'MonkeyPatch') -> None:
         """Должен возвращать один и тот же экземпляр настроек при повторных вызовах."""
-        settings1 = get_settings()
+        AppContainer.config.reset_override()
+        settings1 = AppContainer.config()
 
         monkeypatch.setenv(f'{BASE_ENV_PREFIX}PORT', '1234')
 
-        settings2 = get_settings()
+        settings2 = AppContainer.config()
 
         assert settings1 is settings2

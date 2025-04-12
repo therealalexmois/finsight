@@ -6,7 +6,6 @@
 import logging
 import os
 import tomllib
-from functools import lru_cache
 from pathlib import Path
 from socket import gethostname
 from typing import cast, Final  # noqa: TC003
@@ -127,18 +126,3 @@ def _extract_project_field(field_name: str, app_config_path: Path) -> str | None
     except KeyError as error:
         logger.error(f'Поле {field_name!r} не найдено в секции [project] файла {app_config_path}: {error}')
         raise
-
-
-@lru_cache(1)
-def get_settings() -> 'Settings':
-    """Возвращает кэшированный экземпляр настроек приложения.
-
-    Функция использует lru_cache для кэширования настроек, чтобы избежать
-    повторного чтения конфигурации из переменных окружения и .env файлов.
-    Это улучшает производительность и гарантирует единообразие конфигурации
-    во всем приложении.
-
-    Returns:
-        Экземпляр настроек приложения.
-    """
-    return Settings()
