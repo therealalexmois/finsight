@@ -11,7 +11,7 @@ from pathlib import Path
 from socket import gethostname
 from typing import cast, Final  # noqa: TC003
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.app.domain.constants import AppEnv, LogLevel
@@ -79,25 +79,6 @@ class AppSettings(BaseSettings):
 
     model_config = SettingsConfigDict(**_ENV_SETTINGS)
 
-    # TODO: Убрать, уже проверяется автоматически
-    @field_validator('env')
-    @classmethod
-    def validate_env(cls, value: AppEnv) -> AppEnv:
-        """Проверяет допустимость значения переменной APP_ENV.
-
-        Args:
-            value: Значение переменной окружения APP_ENV, приведённое к перечислению AppEnv.
-
-        Returns:
-            Проверенное значение переменной окружения.
-
-        Raises:
-            ValueError: Если переданное значение не входит в допустимые значения перечисления AppEnv.
-        """
-        if value not in AppEnv:
-            raise ValueError(f'Недопустимое значение APP_ENV: {value}. Допустимые: {list(AppEnv)}')
-        return value
-
 
 class LoggingSettings(BaseSettings):
     """Настройки логирования."""
@@ -107,25 +88,6 @@ class LoggingSettings(BaseSettings):
     )
 
     model_config = SettingsConfigDict(**_ENV_SETTINGS)
-
-    # TODO: Убрать, уже проверяется автоматически
-    @field_validator('level')
-    @classmethod
-    def validate_log_level(cls, value: LogLevel) -> LogLevel:
-        """Проверяет допустимость значения переменной APP_LOG_LEVEL.
-
-        Args:
-            value: Значение уровня логирования, приведённое к перечислению LogLevel.
-
-        Returns:
-            Проверенное значение уровня логирования.
-
-        Raises:
-            ValueError: Если переданное значение не входит в допустимые значения LogLevel.
-        """
-        if value not in LogLevel:
-            raise ValueError(f'Недопустимый уровень логирования: {value}. Допустимые: {list(LogLevel)}')
-        return value
 
 
 class Settings(BaseSettings):
