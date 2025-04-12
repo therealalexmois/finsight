@@ -13,7 +13,7 @@ from src.app.infrastructure.config import _extract_project_field, Settings
 
 
 @pytest.mark.unit
-class TestSettings:
+class TestConfig:
     @staticmethod
     @pytest.fixture()
     def sample_pyproject(tmp_path: 'Path') -> 'Path':
