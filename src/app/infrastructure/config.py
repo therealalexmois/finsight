@@ -83,7 +83,7 @@ class AppSettings(BaseSettings):
 class LoggingSettings(BaseSettings):
     """Настройки логирования."""
 
-    level: LogLevel = Field(
+    log_level: LogLevel = Field(
         default=DEFAULT_APP_LOG_LEVEL, description='Уровень логирования приложения: info, warning или error.'
     )
 

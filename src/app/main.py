@@ -20,7 +20,7 @@ def start_app() -> None:
         app_version=settings.app.version,
         env=settings.app.env,
         instance=settings.app.host,
-        log_level=settings.logging.level,
+        log_level=settings.logging.log_level,
     )
 
     logger = StructlogLogger('uvicorn')
@@ -40,7 +40,7 @@ def start_app() -> None:
         # TODO: Вынести в конфиг
         access_log=False,
         log_config=None,
-        log_level=settings.logging.level.value,
+        log_level=settings.logging.log_level.value,
     )
 
 
