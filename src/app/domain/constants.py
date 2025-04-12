@@ -8,6 +8,7 @@ LOGGER_NAME: Final[str] = 'app'
 DEFAULT_DISABLED_LOGGER_NAMES: frozenset[str] = frozenset(['uvicorn.access'])
 
 
+@unique
 class AppEnv(str, Enum):
     """Перечисление окружений приложения."""
 
@@ -16,6 +17,7 @@ class AppEnv(str, Enum):
     PROD = 'production'
 
 
+@unique
 class LogLevel(str, Enum):
     """Уровни журналирования в приложении."""
 

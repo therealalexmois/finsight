@@ -3,9 +3,10 @@
 PredictionDirection — направление движения цены: рост, падение или нейтрально.
 """
 
-from enum import Enum
+from enum import Enum, unique
 
 
+@unique
 class PredictionDirection(Enum):
     """Перечисление направлений движения цены актива."""
 
