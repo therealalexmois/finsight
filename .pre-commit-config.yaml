@@ -46,8 +46,6 @@ repos:
       verbose: true
       pass_filenames: false
       stages: [pre-commit]
-      env:
-        - MYPY_USE_CACHE_DIR=0
 
     - id: run-critical-tests
       name: Run critical tests
