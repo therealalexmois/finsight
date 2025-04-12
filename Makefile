@@ -96,6 +96,9 @@ clean:
 
 ci-checks: lint type-check
 
+dev:
+	$(PYTHON) -m src.app.main --reload $(ARGS)
+
 start:
 	$(PYTHON) -m src.app.main $(ARGS)
 

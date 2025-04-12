@@ -37,7 +37,6 @@ def start_app() -> None:
         app,
         host=settings.app.host,
         port=settings.app.port,
-        reload=settings.app.reload,
         # TODO: Вынести в конфиг
         access_log=False,
         log_config=None,
