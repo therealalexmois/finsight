@@ -10,7 +10,7 @@ from pathlib import Path
 from socket import gethostname
 from typing import cast, Final  # noqa: TC003
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.app.domain.constants import AppEnv, LogLevel
@@ -89,11 +89,32 @@ class LoggingSettings(BaseSettings):
     model_config = SettingsConfigDict(**_ENV_SETTINGS)
 
 
+class TinkoffInvestApiSettings(BaseSettings):
+    """Настройки интеграции с Tinkoff Invest API.
+
+    Используется sandbox токен с правами только на чтение. Токен должен быть активным и действующим.
+    Истекает через 3 месяца с момента последнего использования. Может быть отозван вручную в личном кабинете.
+
+    Подробнее: https://tinkoff.github.io/investAPI/token/
+    """
+
+    public_token: SecretStr = Field(
+        alias='APP_TINKOFF_INVEST_API_TOKEN_PUBLIC',
+        description='Публичный sandbox токен для Tinkoff Invest API, используется для чтения истории и портфеля.',
+        frozen=True,
+    )
+
+    model_config = SettingsConfigDict(**_ENV_SETTINGS)
+
+
 class Settings(BaseSettings):
     """Основная точка доступа к настройкам всего приложения."""
 
     app: AppSettings = Field(default_factory=AppSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    tinkoff_invest_api: TinkoffInvestApiSettings = Field(
+        default_factory=lambda: TinkoffInvestApiSettings()  # type: ignore[arg-type, call-arg]
+    )
 
     model_config = SettingsConfigDict(**_ENV_SETTINGS)
 
