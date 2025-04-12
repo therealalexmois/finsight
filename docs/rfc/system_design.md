@@ -32,7 +32,7 @@
 
 - [Tinkoff API Docs](https://russianinvestments.github.io/investAPI/)
 - [Python SDK](https://russianinvestments.github.io/investAPI/faq_python/)
-- [TA-Lib (тех. индикаторы)](https://mrjbq7.github.io/ta-lib/)
+- [TA-Lib (тех. индикаторы)](https://ta-lib.org/)
 - [Non-functional requirements (ByteByteGo)](https://blog.bytebytego.com/p/non-functional-requirements-the-backbone)
 
 ---
