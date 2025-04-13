@@ -1,10 +1,18 @@
-"""Общие фикстуры pytest для интеграционного тестирования."""
+"""Общие фикстуры pytest для интеграционного тестирования.
 
-from typing import TYPE_CHECKING
+Содержит фикстуры для:
+- глобальных настроек приложения;
+- создания экземпляра FastAPI-приложения;
+- асинхронного клиента HTTP API;
+- клиента для работы с Tinkoff Invest API.
+"""
+
+from typing import Final, TYPE_CHECKING
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from src.app.infrastructure.config import Settings
 from src.app.infrastructure.container import AppContainer
 from src.app.presentation.webserver.app_factory import AppFactory
 
@@ -13,19 +21,78 @@ if TYPE_CHECKING:
 
     from fastapi import FastAPI
 
+    from src.app.application.ports.gateways.tinkoff_gateway import TinkoffInvestGateway
+
+
+TEST_API_BASE_URL: Final[str] = 'http://test'
+
+
+@pytest.fixture(scope='session')
+def settings() -> 'Settings':
+    """Возвращает глобальные настройки приложения.
+
+    Читает настройки из конфигурационного класса `Settings` и
+    инициализирует контейнер зависимостей.
+    """
+    settings = Settings()
+    return settings
+
+
+@pytest.fixture(scope='session')
+def app_container(settings: 'Settings') -> AppContainer:
+    """Создаёт и конфигурирует контейнер зависимостей приложения.
+
+    Args:
+        settings: Конфигурация приложения.
+
+    Returns:
+        Инициализированный контейнер зависимостей.
+    """
+    container = AppContainer()
+    container.config.from_pydantic(settings)
+    return container
+
 
 @pytest.fixture
-def fastapi_app() -> 'FastAPI':
-    """Предоставляет экземпляр приложения FastAPI для тестирования."""
-    config = AppContainer.config()
+def fastapi_app(settings: 'Settings') -> 'FastAPI':
+    """Создаёт и возвращает экземпляр FastAPI-приложения для тестирования.
 
-    app_factory = AppFactory(config)
+    Args:
+        settings: Настройки приложения.
 
-    return app_factory.create_app()
+    Returns:
+        Инициализированный экземпляр FastAPI.
+    """
+    return AppFactory(settings).create_app()
 
 
 @pytest.fixture
-async def async_api_client(fastapi_app: 'FastAPI') -> 'AsyncGenerator[AsyncClient]':
-    """Клиент Async API - для параллельных/асинхронных интеграционных тестов."""
-    async with AsyncClient(transport=ASGITransport(app=fastapi_app), base_url='http://test') as client:
+async def api_client(fastapi_app: 'FastAPI', base_url: str = TEST_API_BASE_URL) -> 'AsyncGenerator[AsyncClient]':
+    """Асинхронный HTTP клиент для тестирования FastAPI API.
+
+    Использует ASGITransport и позволяет отправлять запросы к тестовому приложению.
+
+    Args:
+        fastapi_app: Экземпляр FastAPI.
+        base_url: Базовый URL, используемый в httpx-клиенте (по умолчанию 'http://test').
+
+    Yields:
+        Асинхронный HTTP-клиент.
+    """
+    async with AsyncClient(transport=ASGITransport(app=fastapi_app), base_url=base_url) as client:
         yield client
+
+
+@pytest.fixture(scope='session')
+def tinkoff_gateway(app_container: 'AppContainer') -> 'TinkoffInvestGateway':
+    """Возвращает клиент Tinkoff Invest API из контейнера зависимостей.
+
+    Используется для интеграционных тестов работы с Tinkoff API.
+
+    Args:
+        app_container: Контейнер приложения, с зарегистрированными зависимостями.
+
+    Returns:
+        Реализация порта TinkoffInvestGateway.
+    """
+    return app_container.tinkoff_invest_gateway()
