@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from fastapi import FastAPI
 
 from src.app.domain.exceptions import BaseAppError
+from src.app.presentation.api.rest.v1.router import api_v1_router
 from src.app.presentation.api.system.router import system_router
 from src.app.presentation.webserver.exceptions import base_app_error_handler, validation_error_handler
 from src.app.presentation.webserver.middlewares.request_id import RequestIDMiddleware
@@ -41,7 +42,7 @@ class AppFactory:
             debug=self.settings.app.debug,
         )
 
-        for router in chain([system_router]):
+        for router in chain([system_router, api_v1_router]):
             app.include_router(router)
 
         exception_handlers = [

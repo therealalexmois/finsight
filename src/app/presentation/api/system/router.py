@@ -12,7 +12,7 @@ from fastapi import APIRouter
 
 from src.app.presentation.schemas.system import SystemStatusResponse
 
-system_router: APIRouter = APIRouter(prefix='/system', tags=['system'])
+system_router: APIRouter = APIRouter(prefix='/system', tags=['System'])
 
 
 @system_router.get('/startup', status_code=HTTPStatus.OK, summary='Проверка запуска приложения')
