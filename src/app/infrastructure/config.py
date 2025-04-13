@@ -98,10 +98,23 @@ class TinkoffInvestApiSettings(BaseSettings):
     Подробнее: https://tinkoff.github.io/investAPI/token/
     """
 
-    public_token: SecretStr = Field(
-        alias='APP_TINKOFF_INVEST_API_TOKEN_PUBLIC',
-        description='Публичный sandbox токен для Tinkoff Invest API, используется для чтения истории и портфеля.',
+    token: SecretStr = Field(
+        alias='APP_TINKOFF_INVEST_API_READONLY_TOKEN',
+        description=(
+            'Токен для получения информации: например, состояние портфеля, '
+            'расписание торгов различных торговых площадок, текущие котировки, '
+            'исторические данные. С этим типом токена нельзя выставлять торговые поручения.'
+        ),
         frozen=True,
+    )
+
+    sandbox_token: SecretStr | None = Field(
+        default=None,
+        alias='APP_TINKOFF_INVEST_API_SANDBOX_TOKEN',
+        description=(
+            'Публичный sandbox токен для Tinkoff Invest API, используется для чтения истории и портфеля. '
+            'Не является обязательным.'
+        ),
     )
 
     model_config = SettingsConfigDict(**_ENV_SETTINGS)
