@@ -1,7 +1,7 @@
 """Порт для интеграции с Tinkoff Invest API."""
 
-from abc import abstractmethod
-from typing import Protocol, TYPE_CHECKING
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -9,9 +9,10 @@ if TYPE_CHECKING:
 
     from src.app.domain.models.account_summary import AccountSummaryModel
     from src.app.domain.models.candle import CandleModel
+    from src.app.domain.models.portfolio import PortfolioModel
 
 
-class TinkoffInvestGateway(Protocol):
+class TinkoffInvestGateway(ABC):
     """Интерфейс взаимодействия с Tinkoff Invest API.
 
     Предоставляет абстракции для работы с внешним API Tinkoff Invest,
@@ -60,5 +61,17 @@ class TinkoffInvestGateway(Protocol):
 
         Returns:
             True, если токен действителен. Иначе False.
+        """
+        pass
+
+    @abstractmethod
+    async def get_portfolio(self, account_id: str) -> 'PortfolioModel':
+        """Возвращает актуальное состояние портфеля пользователя.
+
+        Args:
+            account_id: Идентификатор счёта.
+
+        Returns:
+            Модель PortfolioModel с информацией о бумагах, позициях и их стоимости.
         """
         pass

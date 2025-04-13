@@ -12,9 +12,11 @@ from tinkoff.invest import (
 )
 
 from src.app.application.ports.gateways.tinkoff_gateway import TinkoffInvestGateway
+from src.app.domain.models.portfolio import PortfolioModel
 from src.app.infrastructure.adapters.tinkoff.factories import async_client_factory
 from src.app.infrastructure.dto.tinkoff.account_summary_dto import AccountSummaryDTO
 from src.app.infrastructure.dto.tinkoff.candle_dto import CandleDTO
+from src.app.infrastructure.dto.tinkoff.portfolio_dto import PortfolioPositionDTO
 from src.app.infrastructure.utils.retry import retry_on_exception
 
 if TYPE_CHECKING:
@@ -96,6 +98,29 @@ class TinkoffInvestApiClient(TinkoffInvestGateway):
         """
         instrument = await client.instruments.find_instrument(query=isin)
         return instrument.instruments[0].figi
+
+    @retry_on_exception(exceptions=(RequestError,))
+    async def get_portfolio(self, account_id: str) -> 'PortfolioModel':  # type: ignore[override]
+        """Получает текущий портфель по идентификатору счёта.
+
+        Args:
+            account_id: Идентификатор счёта.
+
+        Returns:
+            Модель PortfolioModel с информацией о бумагах, позициях и их стоимости.
+        """
+        async with self._client_factory() as client:
+            response = await client.operations.get_portfolio(account_id=account_id)
+
+            positions = [PortfolioPositionDTO.from_sdk(p).to_model() for p in response.positions]
+            total_value = float(sum(p.value for p in positions))
+
+            return PortfolioModel(
+                account_id=account_id,
+                total_value=total_value,
+                currency='—',
+                positions=positions,
+            )
 
     async def verify_token(self, debug: bool = False) -> bool:
         """Проверяет валидность токена Tinkoff API.
