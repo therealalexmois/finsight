@@ -1,11 +1,10 @@
 """Адаптер клиента Tinkoff Invest API с использованием официального SDK."""
 
-from contextlib import asynccontextmanager
+from collections.abc import Callable
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from tinkoff.invest import (
-    AsyncClient,
     CandleInterval,
     GetAccountsResponse,
     GetUserTariffResponse,
@@ -13,12 +12,14 @@ from tinkoff.invest import (
 )
 
 from src.app.application.ports.gateways.tinkoff_gateway import TinkoffInvestGateway
+from src.app.infrastructure.adapters.tinkoff.factories import async_client_factory
 from src.app.infrastructure.dto.tinkoff.account_summary_dto import AccountSummaryDTO
 from src.app.infrastructure.dto.tinkoff.candle_dto import CandleDTO
 from src.app.infrastructure.utils.retry import retry_on_exception
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncGenerator, Sequence
+    from collections.abc import Sequence
+    from contextlib import AbstractAsyncContextManager
 
     from tinkoff.invest.async_services import AsyncServices
 
@@ -27,28 +28,28 @@ if TYPE_CHECKING:
     from src.app.domain.models.candle import CandleModel
 
 
+AsyncClientFactory = Callable[[], 'AbstractAsyncContextManager[AsyncServices]']
+
+
 class TinkoffInvestApiClient(TinkoffInvestGateway):
     """Реализация клиента Tinkoff Invest API."""
 
-    def __init__(self, token: str, logger: 'Logger') -> None:
+    def __init__(
+        self,
+        token: str,
+        logger: 'Logger',
+        client_factory: 'AsyncClientFactory | None' = None,
+    ) -> None:
         """Инициализирует клиента с заданным токеном.
 
         Args:
             token: Токен авторизации в Tinkoff Invest API.
             logger: Логгер приложения.
+            client_factory: Фабрика для создания клиента. Если не задана, используется стандартный AsyncClient.
         """
         self._token = token
         self._logger = logger
-
-    @asynccontextmanager
-    async def _session(self) -> 'AsyncGenerator[AsyncServices]':
-        """Создаёт сессию клиента Tinkoff Invest API.
-
-        Yields:
-            Экземпляр клиента AsyncClient.
-        """
-        async with AsyncClient(self._token) as client:
-            yield client
+        self._client_factory = client_factory or (lambda: async_client_factory(self._token))
 
     @retry_on_exception(exceptions=(RequestError,))
     async def get_account_summary(self) -> 'AccountSummaryModel':  # type: ignore[override]
@@ -57,7 +58,7 @@ class TinkoffInvestApiClient(TinkoffInvestGateway):
         Returns:
             Доменная модель со сводной информацией о счетах.
         """
-        async with self._session() as client:
+        async with self._client_factory() as client:
             accounts = await client.users.get_accounts()
             return AccountSummaryDTO.from_sdk(accounts.accounts).to_model()
 
@@ -73,7 +74,7 @@ class TinkoffInvestApiClient(TinkoffInvestGateway):
         Returns:
             Список словарей с информацией о свечах.
         """
-        async with self._session() as client:
+        async with self._client_factory() as client:
             figi = await self._resolve_figi(client, isin)
             response = await client.market_data.get_candles(
                 figi=figi,
@@ -109,7 +110,7 @@ class TinkoffInvestApiClient(TinkoffInvestGateway):
             True — токен действителен, False — нет.
         """
         try:
-            async with self._session() as client:
+            async with self._client_factory() as client:
                 accounts = await client.users.get_accounts()
                 if debug:
                     await self._log_debug_info(client, accounts)

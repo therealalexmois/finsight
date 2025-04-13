@@ -40,6 +40,7 @@ pre-commit = "==4.1.0"
 ruff = "==0.9.6"
 mypy = "==1.15.0"
 commitizen = "==4.2.1"
+grpc-stubs = "==1.53.0.5"
 
 [tool.poetry.group.test.dependencies]
 httpx = "==0.28.1"
