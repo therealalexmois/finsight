@@ -14,8 +14,10 @@ from src.app.presentation.webserver.app_factory import AppFactory
 def start_app() -> None:
     """Запускает приложение с помощью uvicorn."""
     settings = Settings()
+
+    AppContainer.config.from_pydantic(settings)
+
     app_container = AppContainer()
-    app_container.config.from_pydantic(settings)
     app_container.wire(modules=[__name__])
 
     configure_logging(

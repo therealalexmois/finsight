@@ -32,16 +32,14 @@ class AppContainer(containers.DeclarativeContainer):
         name=LOGGER_NAME,
     )
 
-    tinkoff_api_token = providers.Callable(lambda c: c['tinkoff_invest_api']['token'].get_secret_value(), config)
-
     tinkoff_client_factory = providers.Factory(
         async_client_factory,
-        token=tinkoff_api_token,
+        token=config.tinkoff_invest_api.token,
     )
 
     tinkoff_invest_gateway: 'providers.Provider[TinkoffInvestGateway]' = providers.Singleton(
         TinkoffInvestApiClient,
-        token=tinkoff_api_token,
+        token=config.tinkoff_invest_api.token,
         logger=logger,
         client_factory=tinkoff_client_factory,
     )

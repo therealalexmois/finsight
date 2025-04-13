@@ -10,7 +10,7 @@ from pathlib import Path
 from socket import gethostname
 from typing import cast, Final  # noqa: TC003
 
-from pydantic import Field, SecretStr
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.app.domain.constants import AppEnv, LogLevel
@@ -98,7 +98,7 @@ class TinkoffInvestApiSettings(BaseSettings):
     Подробнее: https://tinkoff.github.io/investAPI/token/
     """
 
-    token: SecretStr = Field(
+    token: str = Field(
         alias='APP_TINKOFF_INVEST_API_READONLY_TOKEN',
         description=(
             'Токен для получения информации: например, состояние портфеля, '
@@ -108,7 +108,7 @@ class TinkoffInvestApiSettings(BaseSettings):
         frozen=True,
     )
 
-    sandbox_token: SecretStr | None = Field(
+    sandbox_token: str | None = Field(
         default=None,
         alias='APP_TINKOFF_INVEST_API_SANDBOX_TOKEN',
         description=(

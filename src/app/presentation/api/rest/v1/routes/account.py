@@ -16,7 +16,7 @@ router = APIRouter(
 
 
 @router.get(
-    'summary',
+    '/summary',
     status_code=HTTPStatus.OK,
     summary='Получение сводной информации о счетах',
 )
