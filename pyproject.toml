@@ -33,6 +33,7 @@ structlog = "==25.2.0"
 uvicorn = "==0.30.0"
 orjson = "==3.10.16"
 dependency-injector = "==4.46.0"
+tinkoff-investments = "==0.2.0b110"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "==4.1.0"
