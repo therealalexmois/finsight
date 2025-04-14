@@ -5,7 +5,6 @@ from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from tinkoff.invest import (
-    CandleInterval,
     GetAccountsResponse,
     GetUserTariffResponse,
     RequestError,
@@ -13,7 +12,9 @@ from tinkoff.invest import (
 
 from src.app.application.ports.gateways.tinkoff_gateway import TinkoffInvestGateway
 from src.app.domain.models.portfolio import PortfolioModel
-from src.app.infrastructure.adapters.tinkoff.factories import async_client_factory
+from src.app.domain.value_objects.candle_interval import CandleInterval
+from src.app.infrastructure.adapters.tinkoff.client_factory import async_client_factory
+from src.app.infrastructure.adapters.tinkoff.mappers import map_candle_interval_to_sdk
 from src.app.infrastructure.dto.tinkoff.account_summary_dto import AccountSummaryDTO
 from src.app.infrastructure.dto.tinkoff.candle_dto import CandleDTO
 from src.app.infrastructure.dto.tinkoff.portfolio_dto import PortfolioPositionDTO
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
     from src.app.application.ports.logger import Logger
     from src.app.domain.models.account_summary import AccountSummaryModel
     from src.app.domain.models.candle import CandleModel
+    from src.app.domain.value_objects.candle_interval import CandleInterval
 
 
 AsyncClientFactory = Callable[[], 'AbstractAsyncContextManager[AsyncServices]']
@@ -65,28 +67,38 @@ class TinkoffInvestApiClient(TinkoffInvestGateway):
             return AccountSummaryDTO.from_sdk(accounts.accounts).to_model()
 
     @retry_on_exception(exceptions=(RequestError,))
-    async def get_candles_by_isin(self, isin: str, from_date: date, to_date: date) -> 'Sequence[CandleModel]':  # type: ignore[override]
-        """Возвращает исторические котировки по ISIN.
+    async def get_candles_by_isin(  # type: ignore[override]
+        self,
+        isin: str,
+        from_date: date,
+        to_date: date,
+        interval: 'CandleInterval',
+    ) -> 'Sequence[CandleModel]':
+        """Возвращает историю котировок по ISIN за указанный период и интервал.
 
         Args:
             isin: ISIN-идентификатор ценной бумаги.
             from_date: Начальная дата периода.
             to_date: Конечная дата периода.
+            interval: Интервал свечей (день, час, минута и т.д.).
 
         Returns:
             Список словарей с информацией о свечах.
         """
         async with self._client_factory() as client:
-            figi = await self._resolve_figi(client, isin)
+            figi = await self._get_figi_by_isin(client, isin)
+            sdk_interval = map_candle_interval_to_sdk(interval)
+
             response = await client.market_data.get_candles(
                 figi=figi,
                 from_=datetime.combine(from_date, datetime.min.time()),
                 to=datetime.combine(to_date, datetime.min.time()),
-                interval=CandleInterval.CANDLE_INTERVAL_DAY,
+                interval=sdk_interval,
             )
-            return [CandleDTO.from_sdk(candle).to_model() for candle in response.candles]
 
-    async def _resolve_figi(self, client: 'AsyncServices', isin: str) -> str:
+            return [CandleDTO.from_sdk(candle, figi=figi, interval=interval).to_model() for candle in response.candles]
+
+    async def _get_figi_by_isin(self, client: 'AsyncServices', isin: str) -> str:
         """Получает FIGI по ISIN.
 
         Args:

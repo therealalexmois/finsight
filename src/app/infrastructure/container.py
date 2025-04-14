@@ -6,15 +6,15 @@ from dependency_injector import containers, providers
 
 from src.app.domain.constants import LOGGER_NAME
 from src.app.infrastructure.adapters.logger.structlog_logger import StructlogLogger
-from src.app.infrastructure.adapters.tinkoff.client import TinkoffInvestApiClient
-from src.app.infrastructure.adapters.tinkoff.factories import (
+from src.app.infrastructure.adapters.tinkoff.client_factory import (
     async_client_factory as async_tinkoff_api_client_factory,
 )
+from src.app.infrastructure.adapters.tinkoff.invest_client import TinkoffInvestApiClient
 
 if TYPE_CHECKING:
     from src.app.application.ports.gateways.tinkoff_gateway import TinkoffInvestGateway
     from src.app.application.ports.logger import Logger
-    from src.app.infrastructure.adapters.tinkoff.client import AsyncClientFactory
+    from src.app.infrastructure.adapters.tinkoff.invest_client import AsyncClientFactory
 
 
 def async_client_factory(token: str) -> 'AsyncClientFactory':

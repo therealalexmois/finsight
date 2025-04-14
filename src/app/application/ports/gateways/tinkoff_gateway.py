@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from src.app.domain.models.account_summary import AccountSummaryModel
     from src.app.domain.models.candle import CandleModel
     from src.app.domain.models.portfolio import PortfolioModel
+    from src.app.domain.value_objects.candle_interval import CandleInterval
 
 
 class TinkoffInvestGateway(ABC):
@@ -33,7 +34,13 @@ class TinkoffInvestGateway(ABC):
         pass
 
     @abstractmethod
-    async def get_candles_by_isin(self, isin: str, from_date: 'date', to_date: 'date') -> 'Sequence[CandleModel]':
+    async def get_candles_by_isin(
+        self,
+        isin: str,
+        from_date: 'date',
+        to_date: 'date',
+        interval: 'CandleInterval',
+    ) -> 'Sequence[CandleModel]':
         """Возвращает историю котировок по ISIN за указанный период.
 
         Используется для получения дневных OHLCV-данных (открытие, максимум,
@@ -43,6 +50,7 @@ class TinkoffInvestGateway(ABC):
             isin: Международный идентификатор ценной бумаги (ISIN).
             from_date: Начальная дата интервала.
             to_date: Конечная дата интервала.
+            interval: Интервал свечей (день, час, минута и т.д.).
 
         Returns:
             Последовательность моделей CandleModel, представляющих данные по свечам.

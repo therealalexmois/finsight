@@ -5,6 +5,7 @@ from datetime import datetime, UTC
 import pytest
 from tinkoff.invest import HistoricCandle, Quotation
 
+from src.app.domain.value_objects.candle_interval import CandleInterval
 from src.app.infrastructure.dto.tinkoff.candle_dto import CandleDTO
 
 
@@ -41,7 +42,11 @@ class TestCandleDTO:
             low=Quotation(units=units_low, nano=nano_low),
         )
 
-        dto = CandleDTO.from_sdk(candle)
+        dto = CandleDTO.from_sdk(
+            candle,
+            figi='TEST_FIGI',
+            interval=CandleInterval.DAY,
+        )
 
         assert dto.time == candle.time
         assert dto.volume == volume
@@ -60,6 +65,8 @@ class TestCandleDTO:
             high=110.789,
             low=95.987,
             volume=1000,
+            figi='TEST_FIGI',
+            interval=CandleInterval.DAY,
         )
 
         model = dto.to_model()
@@ -70,3 +77,5 @@ class TestCandleDTO:
         assert model.high == dto.high
         assert model.low == dto.low
         assert model.volume == dto.volume
+        assert model.figi == dto.figi
+        assert model.interval == dto.interval

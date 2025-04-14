@@ -7,7 +7,8 @@ import pytest
 
 from src.app.domain.models.account_summary import AccountSummaryModel
 from src.app.domain.models.candle import CandleModel
-from src.app.infrastructure.adapters.tinkoff.client import TinkoffInvestApiClient
+from src.app.domain.value_objects.candle_interval import CandleInterval
+from src.app.infrastructure.adapters.tinkoff.invest_client import TinkoffInvestApiClient
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -37,8 +38,9 @@ class TestTinkoffInvestApiClient:
         isin = 'RU0009029540'  # Sber
         today = date.today()
         week_ago = today - timedelta(days=7)
+        interval = CandleInterval.DAY
 
-        candles = await tinkoff_gateway.get_candles_by_isin(isin, week_ago, today)
+        candles = await tinkoff_gateway.get_candles_by_isin(isin, week_ago, today, interval)
 
         assert isinstance(candles, list)
         assert all(isinstance(c, CandleModel) for c in candles)
