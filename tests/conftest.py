@@ -12,16 +12,16 @@ from typing import Final, TYPE_CHECKING
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.app.infrastructure.config import Settings
-from src.app.infrastructure.container import AppContainer
-from src.app.presentation.webserver.app_factory import AppFactory
+from src.finsight_api.infrastructure.config import Settings
+from src.finsight_api.infrastructure.container import AppContainer
+from src.finsight_api.presentation.webserver.app_factory import AppFactory
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
     from fastapi import FastAPI
 
-    from src.app.application.ports.gateways.tinkoff_gateway import TinkoffInvestGateway
+    from src.finsight_api.application.ports.gateways.tinkoff_gateway import TinkoffInvestGateway
 
 
 TEST_API_BASE_URL: Final[str] = 'http://test'

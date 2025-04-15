@@ -71,7 +71,7 @@ lint-and-format: lint-fix lint-format
 
 # Запуск проверки типов
 type-check:
-	@$(MYPY) --config-file=pyproject.toml --no-incremental src tests
+	@$(MYPY) --config-file=pyproject.toml --no-incremental src cli tests
 
 # Запуск тестов
 test:
@@ -96,11 +96,19 @@ clean:
 
 ci-checks: lint type-check
 
-dev:
-	$(PYTHON) -m src.app.main --reload $(ARGS)
+# CLI команды для finsight-api
+finsight-api-start:
+	poetry run python -m cli.finsight_api server start
 
-start:
-	$(PYTHON) -m src.app.main $(ARGS)
+finsight-api-dev:
+	poetry run python -m cli.finsight_api server start --reload
+
+finsight-api-version:
+	poetry run python -m cli.finsight_api version
+
+# CLI команды для finsight-worker
+finsight-worker-start:
+	poetry run python -m cli.finsight_worker worker start
 
 # Цель по умолчанию (установка зависимостей)
 default: install
