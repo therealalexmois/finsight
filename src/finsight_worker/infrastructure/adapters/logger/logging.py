@@ -17,8 +17,6 @@ from structlog.stdlib import (
     ProcessorFormatter,
 )
 
-from src.finsight_api.presentation.webserver.constants import DEFAULT_DISABLED_LOGGER_NAMES
-
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from types import TracebackType
@@ -26,11 +24,11 @@ if TYPE_CHECKING:
 
     from structlog.typing import Processor
 
-    from src.finsight_api.application.ports.logger import Logger
-    from src.finsight_api.domain.constants import AppEnv, LogLevel
+    from src.finsight_worker.application.ports.logger import Logger
+    from src.finsight_worker.domain.constants import AppEnv, LogLevel
 
 
-from src.finsight_api.infrastructure.adapters.logger.processors import (
+from src.finsight_worker.infrastructure.adapters.logger.processors import (
     CommonAttrsAdder,
     ExceptionInfoAttrRenamer,
     LogLevelNormalizer,
@@ -103,7 +101,7 @@ def configure_logging(  # noqa: PLR0913
     root_logger.addHandler(handler)
     root_logger.setLevel(log_level.value.upper())
 
-    disabled = disabled_logger_names or DEFAULT_DISABLED_LOGGER_NAMES
+    disabled = disabled_logger_names or set()
 
     for logger_name in logging.root.manager.loggerDict:
         logger = logging.getLogger(logger_name)

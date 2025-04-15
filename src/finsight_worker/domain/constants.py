@@ -3,7 +3,7 @@
 from enum import Enum, unique
 from typing import Final  # noqa: TC003
 
-LOGGER_NAME: Final[str] = 'finsight-api'
+LOGGER_NAME: Final[str] = 'finsight-worker'
 
 
 @unique

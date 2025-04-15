@@ -35,13 +35,20 @@ orjson = "==3.10.16"
 dependency-injector = "==4.46.0"
 tinkoff-investments = "==0.2.0b110"
 click = "==8.1.8"
+celery = "==5.5.1"
+redis = "==5.2.1"
+typer = "==0.15.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "==4.1.0"
-ruff = "==0.9.6"
-mypy = "==1.15.0"
 commitizen = "==4.2.1"
 grpc-stubs = "==1.53.0.5"
+flower = "==2.0.1"
+celery-types = "==0.23.0"
+
+[tool.poetry.group.lint.dependencies]
+ruff = "==0.9.6"
+mypy = "==1.15.0"
 
 [tool.poetry.group.test.dependencies]
 httpx = "==0.28.1"
