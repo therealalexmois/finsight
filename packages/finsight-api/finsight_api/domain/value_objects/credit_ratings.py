@@ -29,7 +29,6 @@ class CreditRating:
     date_assigned: 'date | None' = None
     source: str | None = None
 
-
     def __post_init__(self) -> None:
         """Проверяет базовые инварианты.
 

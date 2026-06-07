@@ -1,7 +1,7 @@
 # API Design Review — finsight-api
 
-**Дата:** 2026-06-07  
-**Область:** `packages/finsight-api`  
+**Дата:** 2026-06-07
+**Область:** `packages/finsight-api`
 **Ревьюер:** Claude Code (api-design-reviewer skill)
 
 > **Статус:** snapshot-ревью. Зафиксированные проблемы — точки улучшения, не текущий контракт API. Реализованные исправления отражены в коде и не удаляются из этого документа.

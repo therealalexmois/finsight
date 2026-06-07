@@ -1,7 +1,7 @@
 # Test Plan — finsight
 
-**Дата:** 2026-06-07  
-**Пакеты:** `finsight-api`, `finsight-worker`  
+**Дата:** 2026-06-07
+**Пакеты:** `finsight-api`, `finsight-worker`
 **Тест-раннер:** pytest · `asyncio_mode = auto` · маркеры: `unit`, `integration`, `api`, `slow`, `critical`
 
 ---
@@ -165,7 +165,7 @@ UseCase обрабатывает частичные ошибки и паралл
 
 #### 3.7 `presentation/rest/system` — health-check роуты
 
-Маркер: `@pytest.mark.api`.  
+Маркер: `@pytest.mark.api`.
 Фикстура: `api_client` из `conftest.py` (ASGI в памяти, без реального Tinkoff).
 
 | Тест | HTTP-метод | Путь | Ожидаемый статус |
@@ -190,7 +190,7 @@ UseCase обрабатывает частичные ошибки и паралл
 
 #### 3.10 Оставшиеся value objects (перечисления)
 
-`AccountStatus`, `AccountType`, `RiskLevel`, `InstrumentType`, `CandleInterval` — StrEnum/IntEnum.  
+`AccountStatus`, `AccountType`, `RiskLevel`, `InstrumentType`, `CandleInterval` — StrEnum/IntEnum.
 Для каждого: тест полноты членов и, если есть методы, — поведения методов.
 
 ---
