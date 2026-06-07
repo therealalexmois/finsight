@@ -42,7 +42,7 @@ class AppContainer(containers.DeclarativeContainer):
         tinkoff_invest: Singleton адаптера TinkoffInvestAdapter (порт TinkoffInvestPort).
     """
 
-    settings = providers.Singleton(Settings)
+    settings: 'providers.Provider[Settings]' = providers.Singleton(Settings)
 
     logger: 'providers.Provider[LoggerPort]' = providers.Factory(
         StructlogLogger,

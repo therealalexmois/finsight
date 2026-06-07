@@ -61,11 +61,12 @@ class TestConfig:
 
     @staticmethod
     def test_load_settings_from_env__ok(monkeypatch: 'MonkeyPatch') -> None:
-        """Должен загружать настройки из переменных окружения."""
-        monkeypatch.setenv(f'{BASE_ENV_PREFIX}ENV', 'dev')
-        monkeypatch.setenv(f'{BASE_ENV_PREFIX}HOST', '0.0.0.0')
-        monkeypatch.setenv(f'{BASE_ENV_PREFIX}PORT', '9000')
-        monkeypatch.setenv(f'{BASE_ENV_PREFIX}LOG_LEVEL', 'info')
+        """Должен загружать вложенные настройки из переменных окружения."""
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}APP__ENV', 'dev')
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}APP__HOST', '0.0.0.0')
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}APP__PORT', '9000')
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}LOGGING__LOG_LEVEL', 'info')
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}TINKOFF_INVEST_API__TOKEN', 'test-token')
 
         settings = Settings()
 
@@ -78,26 +79,29 @@ class TestConfig:
 
     @staticmethod
     def test_invalid_app_env_raises_error(monkeypatch: 'MonkeyPatch') -> None:
-        """Должен выбрасывать ValueError при некорректном значении APP_ENV."""
-        monkeypatch.setenv(f'{BASE_ENV_PREFIX}ENV', 'invalid_env')
+        """Должен выбрасывать ошибку валидации при некорректном APP_APP__ENV."""
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}TINKOFF_INVEST_API__TOKEN', 'test-token')
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}APP__ENV', 'invalid_env')
         with pytest.raises(ValueError):
             _ = Settings()
 
     @staticmethod
     def test_invalid_log_level_raises_error(monkeypatch: 'MonkeyPatch') -> None:
-        """Должен выбрасывать ValueError при некорректном значении APP_LOG_LEVEL."""
-        monkeypatch.setenv(f'{BASE_ENV_PREFIX}LOG_LEVEL', 'invalid_level')
+        """Должен выбрасывать ошибку валидации при некорректном APP_LOGGING__LOG_LEVEL."""
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}TINKOFF_INVEST_API__TOKEN', 'test-token')
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}LOGGING__LOG_LEVEL', 'invalid_level')
         with pytest.raises(ValueError):
             _ = Settings()
 
     @staticmethod
     def test_get_settings_is_cached(monkeypatch: 'MonkeyPatch') -> None:
-        """Должен возвращать один и тот же экземпляр настроек при повторных вызовах."""
-        AppContainer.config.reset_override()
-        settings1 = AppContainer.config()
+        """Должен возвращать один и тот же экземпляр настроек (Singleton)."""
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}TINKOFF_INVEST_API__TOKEN', 'test-token')
+        AppContainer.settings.reset()
+        settings1 = AppContainer.settings()
 
-        monkeypatch.setenv(f'{BASE_ENV_PREFIX}PORT', '1234')
+        monkeypatch.setenv(f'{BASE_ENV_PREFIX}APP__PORT', '1234')
 
-        settings2 = AppContainer.config()
+        settings2 = AppContainer.settings()
 
         assert settings1 is settings2

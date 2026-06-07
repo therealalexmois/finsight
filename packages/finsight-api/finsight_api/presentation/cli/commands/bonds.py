@@ -103,7 +103,7 @@ def get(
         rprint(text)
         return
 
-    write_json_file(output, text)
+    write_json_file(obj=payload, path=output)
     rprint(f'Snapshot saved to: {output}')
 
 
@@ -148,5 +148,5 @@ def bulk(
         rprint(text)
         return
 
-    write_json_file(output, text)
+    write_json_file(obj=payload, path=output)
     rprint(f'Snapshot saved to: {output}')

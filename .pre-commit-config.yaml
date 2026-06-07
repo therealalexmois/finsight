@@ -18,6 +18,7 @@ repos:
     hooks:
     -   id: codespell
         name: Spell Checker
+        args: [--ignore-words-list=aci]
         stages: [pre-commit]
 
 -   repo: https://github.com/pre-commit/pygrep-hooks
@@ -32,7 +33,7 @@ repos:
     -   id: rst-directive-colons
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.9.6
+  rev: v0.15.16
   hooks:
     - id: ruff
     - id: ruff-format

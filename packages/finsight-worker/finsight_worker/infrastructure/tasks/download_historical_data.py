@@ -4,6 +4,7 @@ from datetime import date
 from typing import TYPE_CHECKING
 
 from finsight_worker.application.use_cases.download_historical_data import (
+    DownloadHistoricalDataInputDto,
     DownloadHistoricalDataUseCase,
 )
 from finsight_worker.domain.value_objects import CandleInterval
@@ -47,8 +48,10 @@ def download_historical_data_task(
     )
 
     use_case.execute(
-        isin=isin,
-        from_date=date.fromisoformat(from_date),
-        to_date=date.fromisoformat(to_date),
-        interval=interval,
+        DownloadHistoricalDataInputDto(
+            isin=isin,
+            from_date=date.fromisoformat(from_date),
+            to_date=date.fromisoformat(to_date),
+            interval=interval,
+        )
     )

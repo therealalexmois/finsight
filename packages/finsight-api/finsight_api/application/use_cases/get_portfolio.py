@@ -4,12 +4,13 @@
 получения портфеля пользователя с помощью шлюза к Tinkoff Invest API.
 """
 
+from dataclasses import replace
+from decimal import Decimal
 from typing import TYPE_CHECKING
-
-from finsight_api.domain.entities.portfolio import PortfolioEntity
 
 if TYPE_CHECKING:
     from finsight_api.application.ports.tinkoff import TinkoffInvestPort
+    from finsight_api.domain.entities.portfolio import PortfolioEntity
 
 
 class GetPortfolioUseCase:
@@ -23,7 +24,7 @@ class GetPortfolioUseCase:
         """
         self._gateway = gateway
 
-    async def execute(self, account_id: str) -> PortfolioEntity:
+    async def execute(self, account_id: str) -> 'PortfolioEntity':
         """Выполняет запрос на получение портфеля для указанного счёта.
 
         Загружает портфель через TinkoffInvestPort и пересобирает PortfolioEntity
@@ -36,11 +37,6 @@ class GetPortfolioUseCase:
             Доменная сущность портфеля PortfolioEntity.
         """
         portfolio = await self._gateway.get_portfolio(account_id)
-        total_value = float(sum(p.value for p in portfolio.positions))
+        total_value = sum((p.value for p in portfolio.positions), start=Decimal(0))
 
-        return PortfolioEntity(
-            account_id=portfolio.account_id,
-            total_value=total_value,
-            currency=portfolio.currency,
-            positions=portfolio.positions,
-        )
+        return replace(portfolio, total_value=total_value)

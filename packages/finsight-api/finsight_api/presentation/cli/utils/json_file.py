@@ -61,7 +61,7 @@ def _normalize_json_obj(obj: Any) -> Any:
     Returns:
         Any: JSON-совместимая структура.
     """
-    if is_dataclass(obj):
+    if is_dataclass(obj) and not isinstance(obj, type):
         return _normalize_json_obj(asdict(obj))
     if isinstance(obj, dict):
         return {str(k): _normalize_json_obj(v) for k, v in obj.items()}

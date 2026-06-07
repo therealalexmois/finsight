@@ -3,12 +3,11 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from finsight_api.domain.value_objects.isin import ISIN
-
 if TYPE_CHECKING:
     from finsight_api.application.ports.logger import LoggerPort
     from finsight_api.application.ports.tinkoff.instruments import TinkoffInstrumentsPort
     from finsight_api.domain.entities.bond import BondEntity
+    from finsight_api.domain.value_objects.isin import ISIN
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -19,7 +18,7 @@ class GetBondByIsinInput:
         isin: ISIN облигации.
     """
 
-    isin: ISIN
+    isin: 'ISIN'
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -32,7 +31,7 @@ class GetBondByIsinOutput:
         error: Текст ошибки, если получить данные не удалось.
     """
 
-    isin: ISIN
+    isin: 'ISIN'
     bond: 'BondEntity | None'
     error: str | None
 

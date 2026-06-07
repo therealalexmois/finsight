@@ -4,14 +4,13 @@ import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from finsight_api.domain.value_objects.isin import ISIN
-
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from finsight_api.application.ports.logger import LoggerPort
     from finsight_api.application.ports.tinkoff.instruments import TinkoffInstrumentsPort
     from finsight_api.domain.entities.bond import BondEntity
+    from finsight_api.domain.value_objects.isin import ISIN
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -36,7 +35,7 @@ class BondFetchError:
         error: Текст ошибки.
     """
 
-    isin: ISIN
+    isin: 'ISIN'
     error: str
 
 
@@ -91,7 +90,7 @@ class GetBondsByIsinUseCase:
         bonds: list[BondEntity] = []
         errors: list[BondFetchError] = []
 
-        async def _fetch_one(isin: ISIN) -> None:
+        async def _fetch_one(isin: 'ISIN') -> None:
             async with semaphore:
                 try:
                     bond = await self._tinkoff.get_bond_by_isin(isin)

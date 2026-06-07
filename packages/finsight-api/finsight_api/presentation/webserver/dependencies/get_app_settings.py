@@ -10,7 +10,7 @@ from finsight_api.infrastructure.container import AppContainer
 
 def get_app_settings() -> 'Settings':
     """Возвращает экземпляр настроек приложения."""
-    return AppContainer.config()
+    return AppContainer.settings()
 
 
 AppSettingsDep = Annotated[Settings, Depends(get_app_settings)]

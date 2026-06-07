@@ -9,7 +9,7 @@ from dataclasses import asdict
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 import typer
 from rich import print as rprint
@@ -62,7 +62,7 @@ def snapshot_to_json_dict(output: BuildPortfolioSnapshotOutput) -> dict[str, obj
         dict[str, object]: JSON-совместимое представление.
     """
     raw = asdict(output)
-    return _json_normalize(raw)
+    return cast('dict[str, object]', _json_normalize(raw))
 
 
 def _parse_date(value: str | None) -> date | None:

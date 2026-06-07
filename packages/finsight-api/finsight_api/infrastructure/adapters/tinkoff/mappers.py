@@ -198,6 +198,8 @@ def map_bond_from_sdk(bond: 'SdkBond') -> BondEntity:
         floating_coupon_flag=bond.floating_coupon_flag,
         amortization_flag=bond.amortization_flag,
         liquidity_flag=bond.liquidity_flag,
+        for_iis_flag=bond.for_iis_flag,
+        for_qual_investor_flag=bond.for_qual_investor_flag,
     )
 
 

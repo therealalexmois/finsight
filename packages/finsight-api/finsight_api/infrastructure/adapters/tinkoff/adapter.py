@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 from t_tech.invest import (
     AioRequestError,
-    BondsResponse,
     GetAccountsResponse,
     GetUserTariffResponse,
     InstrumentIdType,
@@ -134,7 +133,7 @@ class TinkoffInvestAdapter(TinkoffInvestPort):
         if not instrument.instruments:
             raise ValueError(f'Инструмент не найден по ISIN: {isin}')
 
-        return instrument.instruments[0].figi
+        return str(instrument.instruments[0].figi)
 
     async def get_portfolio(self, account_id: str) -> 'PortfolioEntity':
         """Получает текущий портфель по идентификатору счёта.
@@ -165,15 +164,17 @@ class TinkoffInvestAdapter(TinkoffInvestPort):
             )
             return map_bond_from_sdk(response.instrument)
 
-    async def get_bond_by_isin(self, isin: 'ISIN') -> 'BondEntity | None':
+    async def get_bond_by_isin(self, isin: 'ISIN') -> 'BondEntity':
         """Возвращает метаданные облигации по ISIN.
 
         Args:
             isin: ISIN облигации.
 
         Returns:
-            Найденная облигация или None, если SDK вернул ошибку AioRequestError
-            (причина пишется в лог).
+            Доменная сущность облигации.
+
+        Raises:
+            AioRequestError: Если SDK вернул ошибку (предварительно пишется в лог).
         """
         async with self._client_factory() as client:
             try:
@@ -182,12 +183,7 @@ class TinkoffInvestAdapter(TinkoffInvestPort):
                     id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER,
                     class_code='TQCB',
                 )
-                # response = await client.instruments.find_instrument(
-                #     query=isin.value,
-                #     instrument_kind=InstrumentType.INSTRUMENT_TYPE_BOND,
-                # )
-                return response
-                # return map_bond_from_sdk(response.instrument)
+                return map_bond_from_sdk(response.instrument)
             except AioRequestError as exc:
                 metadata = exc.metadata
 
@@ -200,13 +196,7 @@ class TinkoffInvestAdapter(TinkoffInvestPort):
                     ratelimit_remaining=getattr(metadata, 'ratelimit_remaining', None),
                     ratelimit_reset=getattr(metadata, 'ratelimit_reset', None),
                 )
-                return None
-
-    async def get_bonds(self) -> BondsResponse:
-        """Запрашивает список облигаций через instruments.bonds()."""
-        async with self._client_factory() as client:
-            response = await client.instruments.bonds()
-            return len(response)
+                raise
 
     async def get_bond_coupons(
         self,

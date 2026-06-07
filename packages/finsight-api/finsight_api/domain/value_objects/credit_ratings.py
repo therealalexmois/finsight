@@ -3,11 +3,11 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from finsight_api.domain.value_objects.credit_rating_agency import CreditRatingAgency
-
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from datetime import date
+
+    from finsight_api.domain.value_objects.credit_rating_agency import CreditRatingAgency
 
 
 # TODO: можно переписать `__getitem__`
@@ -23,7 +23,7 @@ class CreditRating:
         source: Источник рейтинга (например, 'dohod.ru'), если известен.
     """
 
-    agency: CreditRatingAgency
+    agency: 'CreditRatingAgency'
     value: str
     outlook: str | None = None
     date_assigned: 'date | None' = None
@@ -76,7 +76,7 @@ class CreditRatings:
 
         return cls(items=tuple(unique.values()))
 
-    def get(self, agency: CreditRatingAgency) -> CreditRating | None:
+    def get(self, agency: 'CreditRatingAgency') -> CreditRating | None:
         """Возвращает рейтинг по агентству.
 
         Args:

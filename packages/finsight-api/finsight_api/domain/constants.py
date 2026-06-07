@@ -1,14 +1,14 @@
 # TODO: Убрать из домена
 """Константы и перечисления, используемые в приложении."""
 
-from enum import Enum, unique
+from enum import StrEnum, unique
 from typing import Final  # noqa: TC003
 
 LOGGER_NAME: Final[str] = 'finsight-api'
 
 
 @unique
-class AppEnv(str, Enum):
+class AppEnv(StrEnum):
     """Перечисление окружений приложения."""
 
     LOCAL = 'local'
@@ -17,7 +17,7 @@ class AppEnv(str, Enum):
 
 
 @unique
-class LogLevel(str, Enum):
+class LogLevel(StrEnum):
     """Уровни журналирования в приложении."""
 
     INFO = 'info'
@@ -26,7 +26,7 @@ class LogLevel(str, Enum):
 
 
 @unique
-class LogAttrName(str, Enum):
+class LogAttrName(StrEnum):
     """Имена технических атрибутов записи лога."""
 
     ENV = 'env'

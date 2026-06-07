@@ -8,7 +8,7 @@ from dataclasses import dataclass
 _MIN_AMOUNT = 0.0  # Минимально допустимая сумма (исключительно)
 
 
-@dataclass(frozen=True, slots=True, kw_only=True)
+@dataclass(frozen=True, slots=True)
 class Amount:
     """Тип-значение для представления денежных сумм с обязательной валидацией.
 

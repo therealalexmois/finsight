@@ -10,13 +10,13 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import httpx
-
 from finsight_api.application.ports.credit_ratings import CreditRatingsPort
 from finsight_api.domain.value_objects.credit_rating_agency import CreditRatingAgency
 from finsight_api.domain.value_objects.credit_ratings import CreditRating, CreditRatings
 
 if TYPE_CHECKING:
+    import httpx
+
     from finsight_api.application.ports.logger import LoggerPort
     from finsight_api.domain.value_objects.isin import ISIN
 

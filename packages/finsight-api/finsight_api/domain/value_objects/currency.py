@@ -21,10 +21,11 @@ class Currency:
     code: str
 
     def __post_init__(self) -> None:
-        """Выполняет валидацию валютного кода.
+        """Нормализует код к верхнему регистру и валидирует его по ISO 4217.
 
         Raises:
             ValueError: Если код валюты не соответствует ISO 4217.
         """
+        object.__setattr__(self, 'code', self.code.upper())
         if len(self.code) != _CURRENCY_CODE_LENGTH or not self.code.isalpha():
             raise ValueError(f'Некорректный код валюты: должен содержать {_CURRENCY_CODE_LENGTH} буквы')
