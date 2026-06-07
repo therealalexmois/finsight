@@ -1,5 +1,7 @@
 # RFC: Проектирование системы FinSight
 
+> **Статус:** целевая архитектура. Документ описывает замысел и проектные решения; часть компонентов (PostgreSQL, Redis, ML-сервис, Nginx, ELK) ещё не реализована. Реализованные компоненты и фактическая структура кода — в [Архитектуре](../architecture.md).
+
 ## 1. Контекст
 
 **FinSight** — это веб-приложение для отслеживания личных финансов и прогнозирования движения акций на основе технического анализа. Система интегрируется с публичным API Tinkoff Invest для получения данных о счёте пользователя, а также предоставляет простой машинно-обучающий сервис для прогноза краткосрочного движения акций (1–7 дней) по ISIN-коду.
@@ -127,7 +129,7 @@ Rel(finsight, tinkoff_api, "Запрашивает данные о счете и
 
 На диаграмме контейнеров показано логическое разделение компонентов внутри системы FinSight: веб-приложение, ML-сервис, база данных, кэш, мониторинг и внешние зависимости.
 
-![Диаграмма контейнеров C2](https://www.plantuml.com/plantuml/png/VPFVJzDG5CVVzrTSzpIIGLzyyWbSK8b0wZQUbx9UjiRsjcblKM9COCGV2QWnCT4OeZ76-3fmau9I_uLp_oFFDojZ4v2mz9pktFFzd7E_cq-q4-iqy4itFDNsKrUAhjPHSikoOkVHNCVJtNGzJMJS3fMMIi-rmy2AV4VXp6oYNTzRjsetPssyMbjPjW8dqJBcLwqQdt0y9UEv2FrBjeoJK5NGh2hAz9bo-cNswPYVHzGtFHeYBy-KIeqjxX6qReUfSfrugxBXgSJhT3KVk-Ef1iBoZ7XI4lmtLgauaOS2rb-mbyH25FbUsz5UgChysjxItL1LnKBZxf9Os_JQOSnPKOm2-aI7PflwT0WMimSc6fgUg2yschDqpDaV_ZutEsQlAkYKgNFE1vJH6MLcs-mIgeiMERVOvL6c2GE_nSEpk6J1bMNH62KNV8Ze2msvon4ttH7GvBqCp0uhza41DJeH_EWBq720_Gt5_TLLGRyv6M2Hb5rITzUX4oQw4yl6W-L2wokzfNU8wHlOqTxqMFUgs-7FILMONb48cbFpd7aoWNy6vZhU2aUlhqM_n1LBrqiOe8udI6fEkoiHq4VpohoSs2xsYc5nGGA9Q7hgORYn8N3bO1WGPCxu_eR_tqOKXu7KNPb2sXudaAK3oi5wFWp7FufjvNG8dC8QB00Kb9n271Ddh9RJJrP5XpUi-tHiwCN7kg97mAsHMy_nbzIcJBGuz-87FemniSyC6wPyFDNKYEO5Ls7Dnw9JjskiLgfBl_YDZIIky2-NeGhVYscUubUvYxuO07hPTJ3csHW62SW1CTbzol7q_WAYCF3L7XcYrRrcqxR-xUV2m_ITIGeyQpGPmNlxbt1WyudJXTCcV0LtZqKdAgVSGGUJrynbyrAvQU3_1G00)
+![Диаграмма контейнеров C2](https://www.plantuml.com/plantuml/png/hPLRQzjA4CVV_Ids-2a19uR3UJfFoJ4vD3G9gktIHwFO6rj4beoqJcfA8HVI2qaR2eMK4bfAANrrBcgKD5Q-mkmtwinOlgYsdff0qEvgDF_VN6Qzu2lJK-scBGf_L_wtd99LRwXAmNMKQJdIypEPloodQhThKZIKQld_vlEUkJrVjrIZlTxsfLT5K-ce-QhRpBTiqo5VSxwgsTPwll3Fd457ZrTNyatJLzB3ev7p-HRQPZ86ohZE33dBYInyXWX-wYEumkSvTFKU1BJFpcOofGxwQ5R-SzjEpVGwCnkMunClVZP0pywAPnc1VqELeLN5R5baYI2Bnh9ORBLigsegotMoU6nqLCDrSY9-JKVm2Sxq3dJXZ33q8U50eFT4SQbKdaF0BjpX-qZlwiESW1i4Zd1_2I7q8DGxUf-jOnSHkjZ7A5BWjbrlanDGaBRqEk89xyV9-YyOx0GzNh30ZnW9GgJO8trSlSIZNUG98K1r1Ez1X8SzN0K2-Rfum9jqdAQDEgiheYIzBQigHnoi_mK253edKS4v2E2I5RkS5OmUhWK-keAoG_9e78Y7Qsi2Rd5pIJM5S4A-jauwhg_gdYmzMecrli8xUC_hRoZ5xYdYkscDWl_NEO6fPaEckT4la2V452Mpz3OLVOBBapNBZ_kdI6kc-QZVw5UZrLZ9gTWKCNKDRqJPSZRTZGr1dGTXeWWfAPdU81L66M6C9uM-rwyXI9xUNtEqFBSfLKEsITyORbZk528MYrLmVH5NBu8poioWJs_fmIQ8m1LWy0WxEM0FnwZxV3ZhIq_LZEhdBix_89FBpfRqbHZCwWVeKSOvq90gpa2JKGbA09VzIjIBHe7kbQAqu-ldjxjYog2ZFPad3PE4yHMsZqeS4X64QNZwO8I76ug5iARA9ASJJaPSF6nf_SmDyQ1SDlAfdddmu3l2nSJvVjJSEKSJX3YRKzsCpybeA7W-OvIfdoKQ2qx7EoGkp-GzcJONr77weD_y-lXFxaRgjO8n0T2qqyN7Aj-z7-a5wTJeL_8N)
 
 <details>
 <summary>PlantUML код для генерации диаграммы Контейнеров</summary>
@@ -140,21 +142,27 @@ Rel(finsight, tinkoff_api, "Запрашивает данные о счете и
 Person(user, "Пользователь")
 
 System_Boundary(finsight, "FinSight") {
-    Container(api, "FastAPI Application", "Python + FastAPI", "Обрабатывает REST-запросы, координирует работу")
-    Container(ml_service, "ML Service", "Python", "Сервис предсказаний на основе KNN модели")
+    Container(finsight_api, "FastAPI Application", "Python, FastAPI", "Обрабатывает REST-запросы, координирует работу")
+    Container(finsight_worker, "Celery Worker", "Python, Celery", "Загружает исторические рыночные данные")
+    Container(finsight_ml, "ML Service", "Python", "Сервис предсказаний на основе KNN модели")
     Container(db, "PostgreSQL", "СУБД", "Хранит пользователей, транзакции и историю предсказаний")
-    Container(redis, "Redis", "Кэш", "Кэширует ответы от Tinkoff API и данные модели")
+    Container(redis_api, "Redis", "Кэш", "Кэширует ответы от Tinkoff API и данные модели")
+    Container(finsight_worker_redis, "Redis", "Хранилище", "Хранит исторические рыночные данные")
     Container(prometheus, "Prometheus", "Мониторинг", "Собирает метрики приложения")
 }
 
 System_Ext(tinkoff_api, "Tinkoff Invest API", "Инвестиционные данные через gRPC")
 
-Rel(user, api, "REST-запросы")
-Rel(api, tinkoff_api, "Получение инвестиционных данных", "gRPC")
-Rel(api, ml_service, "Запрос на предсказание", "HTTP/gRPC")
-Rel(api, db, "Чтение/запись данных", "SQL")
-Rel(api, redis, "Кэширование")
-Rel(api, prometheus, "Метрики")
+Rel(user, finsight_api, "REST-запросы")
+Rel(finsight_api, tinkoff_api, "Получение инвестиционных данных", "gRPC")
+Rel(finsight_api, finsight_ml, "Запрос на предсказание", "HTTP/gRPC")
+Rel(finsight_api, db, "Чтение/запись данных", "SQL")
+Rel(finsight_api, redis_api, "Кэширование")
+Rel(finsight_api, prometheus, "Метрики")
+
+Rel(finsight_worker, finsight_worker_redis, "Сохраняет исторические рыночные данные", "TCP")
+
+Rel(finsight_ml, finsight_worker_redis, "Получает исторические рыночные данные", "TCP")
 
 @enduml
 ```
@@ -285,7 +293,7 @@ CREATE TABLE predictions (
 | МЛ-библиотека     | scikit-learn     |
 | СУБД             | PostgreSQL       |
 | Кэш              | Redis            |
-| Очередь          | Celery (в будущем)|
+| Очередь          | Celery           |
 | CI/CD            | GitHub Actions   |
 | Контейнеризация  | Docker           |
 | Reverse Proxy    | Nginx            |

@@ -49,7 +49,7 @@ repos:
 
     - id: run-critical-tests
       name: Run critical tests
-      entry: pytest -m critical
+      entry: uv run pytest -m critical
       language: system
       verbose: true
       pass_filenames: false

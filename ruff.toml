@@ -78,8 +78,11 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"tests/*" = ["D100", "D101", "D102", "D103", "D104"]
+"**/tests/**" = ["D100", "D101", "D102", "D103", "D104", "PLW0108"]
 "__init__.py" = ["ALL"]
+# CLI на typer: typer.Option в дефолтах — идиоматичный паттерн (B008);
+# JSON-хелперы работают с произвольными данными, поэтому Any оправдан (ANN401).
+"**/presentation/cli/**" = ["B008", "ANN401"]
 
 [lint.pydocstyle]
 convention = "google"
@@ -150,6 +153,9 @@ quote-annotations = true
 ignore-variadic-names = true
 
 [lint.isort]
+
+# Локальные пакеты workspace
+known-first-party = ["finsight_api", "finsight_worker", "finsight_core"]
 
 # Запретить импорты из нескольких пакетов в одной строке
 force-single-line = false

@@ -1,6 +1,6 @@
 [project]
 name = "finsight"
-version = "0.1.0"
+version = "1.0.0"
 description = "FastAPI-based REST API for integrating with Tinkoff Invest and predicting short-term stock movements."
 authors = [
   { name = "Aleksander Moiseenko", email = "alex.mois.developer@gmail.com" }
@@ -8,7 +8,7 @@ authors = [
 license = "MIT"
 readme = "README.md"
 keywords = ["fastapi", "ml", "finance", "stock", "predictions", "tinkoff"]
-requires-python = ">=3.13"
+requires-python = ">=3.13,<4"
 
 classifiers = [
   "License :: OSI Approved :: MIT License",
@@ -16,43 +16,46 @@ classifiers = [
   "Framework :: FastAPI"
 ]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+dependencies = [
+  "finsight-api",
+  "finsight-worker",
+]
 
-[tool.poetry]
-package-mode = false
+[tool.uv.workspace]
+members = ["packages/*"]
 
-[tool.poetry.dependencies]
-python = ">=3.13,<4"
-bcrypt = "==4.0.1"
-fastapi = "==0.115.11"
-pydantic = {extras = ["email"], version = "==2.10.6"}
-pydantic-settings = "==2.8.1"
-structlog = "==25.2.0"
-uvicorn = "==0.30.0"
-orjson = "==3.10.16"
-dependency-injector = "==4.46.0"
-tinkoff-investments = "==0.2.0b110"
-click = "==8.1.8"
-celery = "==5.5.1"
-redis = "==5.2.1"
-typer = "==0.15.2"
+[tool.uv.sources]
+finsight-core = { workspace = true }
+finsight-api = { workspace = true }
+finsight-worker = { workspace = true }
+t-tech-investments = { index = "tbank" }
 
-[tool.poetry.group.dev.dependencies]
-pre-commit = "==4.1.0"
-commitizen = "==4.2.1"
-grpc-stubs = "==1.53.0.5"
-flower = "==2.0.1"
-celery-types = "==0.23.0"
+# Tinkoff SDK снят с PyPI (карантин); официальный пакет публикуется на индексе T-Bank.
+[[tool.uv.index]]
+name = "tbank"
+url = "https://opensource.tbank.ru/api/v4/projects/238/packages/pypi/simple/"
+explicit = true
 
-[tool.poetry.group.lint.dependencies]
-ruff = "==0.9.6"
-mypy = "==1.15.0"
+[tool.uv]
+package = false
+default-groups = ["dev", "lint", "test"]
 
-[tool.poetry.group.test.dependencies]
-httpx = "==0.28.1"
-pytest = "==8.3.4"
-pytest-asyncio = "==0.25.3"
-pytest-cov = "==6.0.0"
-pytest-mock = "==3.14.0"
+[dependency-groups]
+dev = [
+  "pre-commit==4.6.0",
+  "commitizen==4.16.3",
+  "grpc-stubs==1.53.0.6",
+  "flower==2.0.1",
+  "celery-types==0.26.0",
+]
+lint = [
+  "ruff==0.15.16",
+  "mypy==2.1.0",
+  "pyrefly==1.0.0",
+]
+test = [
+  "pytest==9.0.3",
+  "pytest-asyncio==1.4.0",
+  "pytest-cov==7.1.0",
+  "pytest-mock==3.15.1",
+]

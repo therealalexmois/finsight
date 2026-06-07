@@ -1,6 +1,9 @@
 [run]
 branch = True
-source = src/app
+source =
+    finsight_api
+    finsight_worker
+    finsight_core
 omit =
     */__init__.py          # Ignore package init files
     tests/*                # Skip tests from coverage
@@ -25,5 +28,5 @@ directory = htmlcov
 
 [paths]
 source =
-    src
+    packages/*/
     .venv/lib/*       # For matching paths across environments

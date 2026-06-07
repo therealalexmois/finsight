@@ -1,35 +1,40 @@
-# finsight-api
+# FinSight
 
-📈 **FinSight API** — REST API на базе FastAPI для интеграции с Tinkoff Invest API и предсказаний краткосрочного движения акций по ISIN.
-
-Проект демонстрирует:
-- Интеграцию с Tinkoff Invest API
-- Предсказания ML модели (KNN) через REST API
-- Чистую архитектуру Python-проекта с использованием `src/`-структуры
-- Структурированное логирование с `structlog` и трассировкой запросов
-- Загрузку конфигурации через `.env` с помощью Pydantic Settings
-- Готовность к расширению (база данных, кэш, фоновые задачи)
+REST API на базе FastAPI для интеграции с T-Bank Invest API и получения финансовых данных по портфелю и счёту. Фоновая загрузка исторических свечей реализована через Celery-воркер.
 
 ---
 
-## 📦 Возможности
+## Возможности
 
-- ✅ REST API для отображения финансовых данных и инференса модели
-- 🔐 Подключение к инвестиционному счёту Tinkoff
-- 🧠 ML модель (KNN) для прогноза движения акций
-- 📊 Визуализация данных (в перспективе)
-- ⚙️ Настройки окружения через `.env.local` и переменные `APP_ENV`
-- 📂 Современная структура проекта (`src/`, Poetry, Ruff, Mypy)
+- Получение списка инвестиционных счётов через T-Bank Invest API.
+- Получение портфеля по идентификатору счёта.
+- Фоновая загрузка исторических свечей (Celery + Redis).
+- Структурированное логирование с трассировкой запросов (structlog, request-id).
+- Конфигурация через переменные окружения (pydantic-settings).
+- Строгая типизация (Mypy strict), линтинг (Ruff), тесты (pytest).
 
 ---
 
-## 🚀 Быстрый старт
+## Структура
+
+Репозиторий организован как uv workspace:
+
+```
+packages/
+  finsight-api/     # HTTP-сервис (FastAPI)
+  finsight-worker/  # Celery-воркер
+  finsight-core/    # Общий код (телеметрия, request-id)
+```
+
+---
+
+## Быстрый старт
 
 ### 1. Клонировать репозиторий
 
 ```bash
-git clone https://github.com/your-username/finsight-api
-cd finsight-api
+git clone https://github.com/therealalexmois/finsight
+cd finsight
 ```
 
 ### 2. Установить зависимости
@@ -38,97 +43,117 @@ cd finsight-api
 make install
 ```
 
-Для установки зависимостей разработчика:
+Команда выполняет `uv sync` для всех пакетов workspace, включая группы `dev`, `lint`, `test`.
 
-```bash
-make install-dev
-```
-
-### 3. Создать .env.local
+### 3. Настроить окружение
 
 ```bash
 cp .env.local.sample .env.local
 ```
 
-Отредактируйте файл, указав токен доступа Tinkoff и другие параметры.
+Откройте `.env.local` и укажите токен T-Bank Invest API и другие параметры.
 
-### 4. Запустить приложение
+Переменные окружения используют префикс `APP_`, вложенные поля разделяются `__`:
 
-Для запуска в обычном режиме:
-
-```bash
-make start
+```
+APP_APP__ENV=local
+APP_TINKOFF_INVEST_API__TOKEN=your_token_here
 ```
 
-Приложение будет доступно по адресу http://127.0.0.1:8000
+`.env.local` подхватывается автоматически только в окружении `local`.
 
-#### 🔁 Локальная разработка с автообновлением (hot reload)
+---
+
+## Запуск
+
+### HTTP-сервис (finsight-api)
 
 ```bash
-make dev
+make finsight-api-start   # обычный режим
+make finsight-api-dev     # с автообновлением (--reload)
 ```
 
-Также можно передать дополнительные параметры через ARGS, например:
+Сервис доступен по адресу `http://127.0.0.1:8000`.
+
+### Celery-воркер (finsight-worker)
+
+Требует запущенный Redis (broker).
 
 ```bash
-make dev ARGS="--port 5000"
+make finsight-worker-start
 ```
 
 ---
 
-## 📊 Примеры запросов
+## Примеры запросов
 
-### Получить сводку по счёту
+### Проверка состояния сервиса
 
 ```bash
-curl -X GET http://localhost:8000/account/summary
+curl http://localhost:8000/system/startup
+curl http://localhost:8000/system/readiness
+curl http://localhost:8000/system/liveness
 ```
 
-### Прогноз по ISIN
+### Список счётов
 
 ```bash
-curl -X GET "http://localhost:8000/predict?isin=RU000A0JX0J2"
+curl http://localhost:8000/api/v1/account/accounts
 ```
 
----
-
-## 🧪 Тестирование
+### Портфель по счёту
 
 ```bash
-make test
-```
-
-С покрытием:
-
-```bash
-make test-with-coverage
+curl http://localhost:8000/api/v1/account/{account_id}/portfolio
 ```
 
 ---
 
-## 🧹 Проверка качества кода
+## Тестирование
 
 ```bash
-make lint        # Линтинг Ruff
-make type-check  # Проверка типов Mypy
-make pre-commit  # Все хуки pre-commit
+make test                # запустить тесты
+make test-with-coverage  # с отчётом о покрытии
+```
+
+Поддерживается передача аргументов pytest через `ARGS`:
+
+```bash
+make test ARGS="-k test_portfolio"
+make test ARGS="-m unit"
+```
+
+Маркеры: `unit`, `integration`, `api`, `slow`, `critical`.
+
+---
+
+## Качество кода
+
+```bash
+make lint        # ruff check .
+make lint-fix    # ruff check . --fix
+make lint-format # ruff format .
+make type-check  # mypy --config-file=mypy.ini
+make pre-commit  # все хуки pre-commit
 ```
 
 ---
 
-## 🛠 Стек технологий
+## Технологический стек
 
-- FastAPI
-- Pydantic v2
-- Poetry
-- Tinkoff Invest API
-- Scikit-learn
-- Structlog
-- PostgreSQL (в перспективе)
-- Redis (опционально)
-- Docker / Make / GitHub Actions
+- Python 3.13
+- uv workspace
+- FastAPI, Pydantic v2
+- Celery, Redis
+- T-Bank Invest API
+- structlog
+- dependency-injector
+- Ruff, Mypy strict
+- pytest
+- Docker, GitHub Actions
 
 ---
 
-📄 Лицензия
+## Лицензия
+
 MIT License © 2025 @therealalexmois

@@ -1,114 +1,93 @@
 .PHONY: \
-	start \
-	install install-dev install-test \
+	install install-dev sync \
 	lint lint-fix lint-format lint-format-check lint-and-format \
 	test test-with-coverage \
-	type-check \
+	type-check type-check-pyrefly type-check-pyrefly-watch \
 	check-project \
 	install-pre-commit pre-commit \
 	clean \
 	ci-checks \
 	default \
-	activate
+	finsight-api-start finsight-api-dev finsight-worker-start
 
-PYTHON := poetry run python
-POETRY := poetry
-PRE_COMMIT := poetry run pre-commit
-RUFF := poetry run ruff
-PYTEST := poetry run pytest
-MYPY := poetry run mypy
+UV := uv
+RUN := uv run
 
-# Активировать виртуальную среду
-activate:
-	@echo "Выполните следующую команду в оболочке, чтобы активировать среду:"
-	@echo "$$(poetry env activate)"
+# Установка всех зависимостей workspace (все пакеты + группы dev/lint/test)
+install:
+	@echo "Синхронизация зависимостей workspace через uv..."
+	@$(UV) sync
+
+install-dev: install
+sync: install
 
 check-project:
-	@echo "Проверка целостности pyproject.toml и poetry.lock"
-	@$(POETRY) check --lock
-	@echo "Запуск хуков по всем файлам"
-	@$(PRE_COMMIT) run --all-files
-
-# Установка всех зависимостей
-install:
-	@echo "Установка всех зависимостей..."
-	@$(POETRY) install
-
-# Установка dev зависимостей
-install-dev:
-	@echo "Установка dev зависимостей..."
-	@$(POETRY) install --with dev
-
-# Установка test зависимостей
-install-test:
-	@echo "Установка test зависимостей..."
-	@$(POETRY) install --with test
+	@echo "Проверка блокировки и хуков"
+	@$(UV) lock --check
+	@$(RUN) pre-commit run --all-files
 
 build:
-	@$(POETRY) build
+	@$(UV) build --all-packages
 
-# Запуск линтера
+# Линтинг
 lint:
 	@echo "Линтинг кода с помощью Ruff"
-	@$(RUFF) check .
+	@$(RUN) ruff check .
 
-# Запуск линтера и исправление ошибок
 lint-fix:
 	@echo "Линтинг кода с исправлениями с помощью Ruff"
-	@$(RUFF) check . --fix
+	@$(RUN) ruff check . --fix
 
-# Форматирование кода
 lint-format:
 	@echo "Форматирование кода с помощью Ruff"
-	@$(RUFF) format .
+	@$(RUN) ruff format .
 
-# Форматирование кода и исправление
 lint-format-check:
-	@echo "Список файлов, которые Ruff может отформатировать"
-	@$(RUFF) format . --check
+	@$(RUN) ruff format . --check
 
 lint-and-format: lint-fix lint-format
 
-# Запуск проверки типов
+# Проверка типов (mypy strict)
 type-check:
-	@$(MYPY) --config-file=pyproject.toml --no-incremental src cli tests
+	@$(RUN) mypy --config-file=mypy.ini
 
-# Запуск тестов
+# Быстрая проверка типов pyrefly
+type-check-pyrefly:
+	@$(RUN) pyrefly check
+
+# Фоновая проверка типов pyrefly в режиме watch
+type-check-pyrefly-watch:
+	@$(RUN) pyrefly check --watch
+
+# Тесты
 test:
-	$(PYTEST) -p no:cacheprovider $(ARGS)
+	@$(RUN) pytest -p no:cacheprovider $(ARGS)
 
-# Запуск тестов с покрытием
 test-with-coverage:
-	$(PYTEST) -p no:cacheprovider --cov=src --cov-report=term-missing $(ARGS)
+	@$(RUN) pytest -p no:cacheprovider --cov-report=term-missing $(ARGS)
 
-# Установка pre-commit hooks
+# pre-commit
 install-pre-commit:
-	@$(PRE_COMMIT) install
+	@$(RUN) pre-commit install
 
-# Запуск pre-commit hooks
 pre-commit:
-	@$(PRE_COMMIT) run --all-files
+	@$(RUN) pre-commit run --all-files
 
-# Очистка кэша и временных файлов
+# Очистка
 clean:
 	@find . -name "__pycache__" -type d -exec rm -rf {} +
-	@rm -rf .mypy_cache .pytest_cache .coverage htmlcov .ruff_cache log/ reports/
+	@rm -rf .mypy_cache .pytest_cache .ruff_cache .coverage htmlcov log/ reports/
 
 ci-checks: lint type-check
 
-# CLI команды для finsight-api
+# Запуск сервисов
 finsight-api-start:
-	poetry run python -m cli.finsight_api server start
+	@$(RUN) finsight-api server start
 
 finsight-api-dev:
-	poetry run python -m cli.finsight_api server start --reload
+	@$(RUN) finsight-api server start --reload
 
-finsight-api-version:
-	poetry run python -m cli.finsight_api version
-
-# CLI команды для finsight-worker
 finsight-worker-start:
-	poetry run python -m cli.finsight_worker worker start
+	@$(RUN) finsight-worker worker start
 
-# Цель по умолчанию (установка зависимостей)
 default: install
