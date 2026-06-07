@@ -4,36 +4,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-FinSight — REST API (FastAPI) для интеграции с Tinkoff Invest API и предсказания краткосрочного движения акций. Репозиторий содержит два независимых сервиса с общим стилем clean architecture:
+FinSight — REST API (FastAPI) для интеграции с Tinkoff Invest API и предсказания краткосрочного движения акций. Репозиторий — **uv workspace** из трёх пакетов в `packages/` с общим стилем clean architecture:
 
-- `finsight_api` — синхронный/async HTTP-сервис (портфель, счёт, облигации, инференс).
+- `finsight_api` — HTTP-сервис (портфель, счёт, облигации, инференс).
 - `finsight_worker` — Celery-воркер для фоновых задач (загрузка исторических данных).
+- `finsight_core` — общий код, переиспользуемый сервисами (сейчас телеметрия / request-id).
 
-Python 3.13, Poetry (`package-mode = false`), Ruff, Mypy strict.
+Python 3.13, uv workspace (корневой `tool.uv.package = false`), Ruff, Mypy strict.
 
 ## Commands
 
-Все команды идут через `make` (обёртки над `poetry run`).
+Все команды идут через `make` (обёртки над `uv run`).
 
 ```bash
-make install          # poetry install
-make install-dev      # + dev-зависимости
-make install-test     # + test-зависимости
+make install          # uv sync (все пакеты + группы dev/lint/test)
+make build            # uv build --all-packages
 
 make lint             # ruff check .
 make lint-fix         # ruff check . --fix
 make lint-format      # ruff format .
-make type-check       # mypy по src/ cli/ tests/ (--no-incremental)
+make type-check       # mypy --config-file=mypy.ini
 make ci-checks        # lint + type-check
 make pre-commit       # pre-commit на всех файлах
 
-make test                  # pytest (cov включён через pytest.ini)
+make test                  # pytest (cov по трём пакетам через pytest.ini)
 make test-with-coverage    # pytest + term-missing
 
-# Запуск сервиса finsight-api (через CLI):
-make finsight-api-start    # python -m cli.finsight_api server start
-make finsight-api-dev      # ... server start --reload
-make finsight-worker-start # python -m cli.finsight_worker worker start
+# Запуск сервисов (через CLI-скрипты пакетов):
+make finsight-api-start    # uv run finsight-api server start
+make finsight-api-dev      # uv run finsight-api server start --reload
+make finsight-worker-start # uv run finsight-worker worker start
 ```
 
 ### Запуск одного теста
@@ -41,18 +41,20 @@ make finsight-worker-start # python -m cli.finsight_worker worker start
 `make test` пробрасывает `ARGS`:
 
 ```bash
-make test ARGS="tests/test_finsight_api/test_domain/test_value_objects/test_isin.py"
+make test ARGS="packages/finsight-api/tests/test_domain/test_value_objects/test_isin.py"
 make test ARGS="-k test_isin and valid"
 make test ARGS="-m unit"      # по маркеру
 ```
 
-Маркеры (`pytest.ini`): `unit`, `integration`, `api`, `slow`, `critical`. `asyncio_mode = auto` — async-тесты не требуют декоратора. `pythonpath = src`.
+Маркеры (`pytest.ini`): `unit`, `integration`, `api`, `slow`, `critical`. `asyncio_mode = auto` — async-тесты не требуют декоратора. `testpaths = packages`, покрытие считается по `finsight_api`, `finsight_worker`, `finsight_core`.
 
 ## Entry points
 
-- HTTP-сервис: CLI `cli/finsight_api` (click) → `src/finsight_api/main.py:start_app` → `AppFactory.create_app()` → uvicorn.
-- Воркер: CLI `cli/finsight_worker` (typer) → `src/finsight_worker/main.py` создаёт `celery_app` и регистрирует задачи.
-- `cli/` — тонкий слой команд; вся логика запуска в `src/`.
+Скрипты объявлены в `[project.scripts]` соответствующих пакетов (см. `docs/architecture.md`):
+
+- HTTP-сервис: `finsight-api` (click) → `finsight_api.cli.main:cli` → `finsight_api/main.py:start_app` → `AppFactory.create_app()` → uvicorn.
+- Воркер: `finsight-worker` (typer) → `finsight_worker.cli.main:cli` → `finsight_worker/main.py` создаёт `celery_app` и регистрирует задачи.
+- `cli/` внутри каждого пакета — тонкий слой команд; логика запуска в `main.py`.
 
 ## Architecture
 
@@ -67,7 +69,7 @@ make test ARGS="-m unit"      # по маркеру
 
 ### Dependency injection
 
-`dependency-injector`. Контейнеры — `src/finsight_api/infrastructure/container.py` (`AppContainer`, singleton-инстанс `app_container`) и `src/finsight_worker/infrastructure/container.py`. Провайдеры собирают `settings`, `logger`, адаптеры Tinkoff. FastAPI-зависимости в `presentation/webserver/dependencies/` достают use cases из контейнера.
+`dependency-injector`. Контейнеры — `packages/finsight-api/finsight_api/infrastructure/container.py` (`AppContainer`, singleton-инстанс `app_container`) и `packages/finsight-worker/finsight_worker/infrastructure/container.py`. Провайдеры собирают `settings`, `logger`, адаптеры Tinkoff. FastAPI-зависимости в `presentation/webserver/dependencies/` достают use cases из контейнера.
 
 ### Tinkoff integration
 
@@ -90,5 +92,6 @@ make test ARGS="-m unit"      # по маркеру
 
 ## Notes
 
-- Репозиторий в процессе рефакторинга структуры (см. `git status` — переименования domain/models → domain/entities, перенос presentation-роутеров). Часть импортов может временно не совпадать с текущим деревом файлов — сверяйся с фактическим расположением перед правками.
-- Файлы в корне (`a.py`, `b.py`, `test.py`, `*.json`) — экспериментальные скрипты/выгрузки, вне основного пакета.
+- Tinkoff SDK сменён: пакет `tinkoff-investments` снят с PyPI (карантин); используется официальный `t-tech-investments` с приватного индекса T-Bank (`[[tool.uv.index]]` в корневом `pyproject.toml`). Пространство имён импорта — `t_tech.invest` (не `tinkoff.invest`).
+- Экспериментальные скрипты и выгрузки вынесены в `scratch/` (`a.py`, `b.py`, `*.json`) — вне основных пакетов.
+- Snapshot-доки `docs/review/`, `docs/specs/`, `docs/plans/` датированы и фиксируют состояние на дату ревью — не редактируются как живая документация.

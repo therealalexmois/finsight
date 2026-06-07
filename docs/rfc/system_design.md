@@ -299,7 +299,7 @@ CREATE TABLE predictions (
 | Reverse Proxy    | Nginx            |
 | Мониторинг       | Prometheus + Grafana |
 | Хранение логов   | ELK stack        |
-| Документация     | Docusaurus + LikeC4 |
+| Документация     | MkDocs Material (+ PlantUML C4) |
 
 ---
 

@@ -40,6 +40,10 @@ nav:
   - Архитектура: architecture.md
   - RFC:
       - Проектирование системы: rfc/system_design.md
+  - Ревью и планы:
+      - API Design Review: review/api-design-review.md
+      - Architecture Review: specs/architecture-review.md
+      - Test Plan: plans/test-plan.md
 
 plugins:
   - search:
@@ -47,7 +51,10 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: [src]
+          paths:
+            - packages/finsight-api
+            - packages/finsight-worker
+            - packages/finsight-core
           options:
             docstring_style: google
             show_source: true
